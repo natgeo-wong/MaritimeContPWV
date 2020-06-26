@@ -5,7 +5,7 @@ This repository contains the basic setup for the **MaritimeContPWV** project, us
 **Created/Mantained By:** Nathanael Wong (nathanaelwong@fas.harvard.edu)\
 **Other Contributors:** Lujia Feng (lfeng@ntu.edu.sg)
 
-> Introductory Text Here.
+> In this project I compare the MIMIC-TPW2m satellite and ERA5 reanalysis precipitable water prod- ucts using GNSS-derived precipitable water as the ground truth. Despite the fact that ERA5 is the product of reanalysis model output, it is closer to GNSS-derived precipitable water values than MIMIC-TPW2m. We postulate that this due to the fact that MIMIC-TPW2m algorithms do not work well over land as compared to the ocean, and therefore reanalysis datasets are still valuable in helping us characterize the climatology of precipitable water vapour over the Maritime Continent. Future studies using precipitable water data should keep this in mind.
 
 ## Current Status
 
@@ -39,7 +39,7 @@ The entire codebase is written in Julia.  If the data files are downloaded, you 
 
 In order to reproduce the results, first you have to clone the repository, and instantiate the project environment in the Julia REPL in order to install the required packages:
 ```
-git clone https://github.com/natgeo-wong/PiPWV.git
+git clone https://github.com/natgeo-wong/MaritimeContPWV.git
 ] activate .
 instantiate
 ```
