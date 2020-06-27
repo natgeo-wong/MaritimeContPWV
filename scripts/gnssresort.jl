@@ -1,3 +1,4 @@
 using DrWatson
 @quickactivate "MaritimeContPWV"
-DrWatson.greet()
+
+include(srcdir("gnss.jl"))
