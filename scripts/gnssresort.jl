@@ -10,5 +10,5 @@ function gnssresortall()
 
 end
 
-# gnssresortall()
-for stn in ["NTUS","SING"]; gstationresort(gstationinfo(stn,retrieveginfo())) end
+gnssresortall()
+# for stn in ["NTUS","SING"]; gstationresort(gstationinfo(stn,retrieveginfo())) end
