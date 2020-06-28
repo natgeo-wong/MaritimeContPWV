@@ -2,6 +2,7 @@ using Dates
 using DelimitedFiles
 using Logging
 using NCDatasets
+using Statistics
 
 function ncoffsetscale(data::Array{<:Real})
 
