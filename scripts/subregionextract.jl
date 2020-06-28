@@ -3,6 +3,7 @@ using DrWatson
 using ClimateERA
 using GeoRegions
 
+gregioninfoadd(srcdir("gregionsadd.txt"))
 
 init,eroot = erastartup(aID=1,dID=1,path="/n/kuangdss01/lab/ecmwf/");
 erasubregion(init,eroot,modID="msfc",parID="tcw",regID="SEA",pregID="TRP");
