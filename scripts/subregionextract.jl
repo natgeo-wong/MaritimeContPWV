@@ -5,13 +5,13 @@ using GeoRegions
 
 gregioninfoadd(srcdir("gregionsadd.txt"))
 
-init,eroot = erastartup(aID=1,dID=1,path="/n/kuangdss01/lab/ecmwf/");
+init,eroot = erastartup(aID=2,dID=1,path="/n/kuangdss01/lab/ecmwf/");
 erasubregion(init,eroot,modID="msfc",parID="tcw",regID="SEA",pregID="TRP");
 erasubregion(init,eroot,modID="msfc",parID="tcw",regID="SMT",pregID="TRP");
 erasubregion(init,eroot,modID="msfc",parID="tcwv",regID="SEA",pregID="TRP");
 erasubregion(init,eroot,modID="msfc",parID="tcwv",regID="SMT",pregID="TRP");
 
-init,eroot = erastartup(aID=1,dID=2,path="/n/kuangdss01/lab/ecmwf/");
+init,eroot = erastartup(aID=2,dID=2,path="/n/kuangdss01/lab/ecmwf/");
 erasubregion(init,eroot,modID="msfc",parID="tcw",regID="SMT",pregID="SEA");
 erasubregion(init,eroot,modID="msfc",parID="tcwv",regID="SMT",pregID="SEA");
 
