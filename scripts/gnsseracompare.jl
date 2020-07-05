@@ -18,9 +18,9 @@ function eravgnss(
     glon = ginf["longitude"]; glat = ginf["latitude"]
     ilon,ilat = regionpoint(glon,glat,ereg["lon"],ereg["lat"])
     nzwd = length(gZWD); npwv = length(ePWV); nt = (etime["End"] - etime["Begin"] + 1) * 12
-    gve  = zeros(Int64,nzwd,npwv,nt); ii = 0; nhr = hrstep(emod)
+    gve  = zeros(Int64,nzwd-1,npwv-1,nt); ii = 0; nhr = hrstep(emod)
 
-    @info "$(Dates.now()) -  Comparing GNSS ZWD vs ECMWF reanalysis TCW at Station $gstn"
+    @info "$(Dates.now()) - Comparing GNSS ZWD vs ECMWF reanalysis TCW at Station $gstn"
 
     for yr = etime["Begin"] : etime["End"], mo = 1 : 12
 
@@ -28,7 +28,7 @@ function eravgnss(
         gfol = datadir("gnss/$(gstn)/$(yr2str(date))")
         gfnc = joinpath("$gfol","$(gstn)-$(yrmo2str(date)).nc")
 
-        if isfile(gfnc); ii = 1
+        if isfile(gfnc); ii += 1
 
             gds = Dataset(gfnc); gzwd = gds["zwd"][:]*1; close(gds);
             gzwd = reshape(gzwd,6*nhr,:);
