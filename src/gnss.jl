@@ -107,7 +107,7 @@ function gstationsave(
     fol = datadir("gnss/$(sinfo["name"])/$(yr2str(dt[1]))");
     if !isdir(fol); mkpath(fol); end
 
-    fnc = datadir("$fol/$(sinfo["name"])-$(yrmo2str(dt[1])).nc")
+    fnc = joinpath("$fol,$(sinfo["name"])-$(yrmo2str(dt[1])).nc")
     if isfile(fnc)
         @info "$(Dates.now()) - Stale NetCDF file $(fnc) detected.  Overwriting ..."
         rm(fnc);
