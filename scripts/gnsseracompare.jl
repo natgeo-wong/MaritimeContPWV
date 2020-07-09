@@ -60,12 +60,13 @@ function eravgnss(
     end
 
     gve = @view gve[:,:,1:ii]; gve = dropdims(sum(gve,dims=3),dims=3)
-    @save "$(datadir("compiled/$(gstn).jld2"))" gve
+    @save "$(datadir("compiled/$(init["prefix"])/$(gstn).jld2"))" gve
 
 end
 
 init,eroot = erastartup(aID=2,dID=1,path="/n/kuangdss01/lab/")
-mkpath(datadir("compiled")); gregioninfoadd(srcdir("gregionsadd.txt"))
+mkpath(datadir("compiled/$(init["prefix"])"));
+gregioninfoadd(srcdir("gregionsadd.txt"))
 
 gstns = retrieveginfo()[:,1]
 for gstn in gstns
