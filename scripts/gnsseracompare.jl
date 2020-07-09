@@ -1,5 +1,6 @@
 using DrWatson
 @quickactivate "MaritimeContPWV"
+
 using ClimateERA
 using GeoRegions
 using JLD2
@@ -9,16 +10,25 @@ include(srcdir("gnss.jl"))
 
 function eravgnss(
     gstn::AbstractString,
-    init::AbstractDict, eroot::AbstractDict;
-    gZWD::AbstractRange=0:0.01:0.6, ePWV::AbstractRange=0:100
+    init::AbstractDict, croot::AbstractDict, proot::AbstractDict;
+    gpwv::AbstractRange=0:100, epwv::AbstractRange=0:100
 )
 
-    emod,epar,ereg,etime = erainitialize(init,modID="msfc",parID="tcw",regID="SMT")
+    cmod,cpar,creg,etime = erainitialize(init,modID="msfc",parID="tcw",regID="SMT")
+    pmod,ppar,preg,_     = erainitialize(
+        init,
+        modID="csfc",parID="Pi_RE5",regID="SMT",
+        gres=1
+    )
+
     ginf = gstationinfo(gstn,retrieveginfo());
     glon = ginf["longitude"]; glat = ginf["latitude"]
-    ilon,ilat = regionpoint(glon,glat,ereg["lon"],ereg["lat"])
-    nzwd = length(gZWD); npwv = length(ePWV); nt = (etime["End"] - etime["Begin"] + 1) * 12
-    gve  = zeros(Int64,nzwd-1,npwv-1,nt); ii = 0; nhr = hrstep(emod)
+
+    ilon,ilat = regionpoint(glon,glat,creg["lon"],creg["lat"])
+    plon,plat = regionpoint(glon,glat,preg["lon"],preg["lat"])
+
+    ngps = length(gpwv); nera = length(epwv); nt = (etime["End"] - etime["Begin"] + 1) * 12
+    gve  = zeros(Int64,ngps-1,nera-1,nt); ii = 0; nhr = hrstep(cmod)
 
     @info "$(Dates.now()) - Comparing GNSS ZWD vs ECMWF reanalysis TCW at Station $gstn"
 
@@ -34,12 +44,16 @@ function eravgnss(
             gzwd = reshape(gzwd,6*nhr,:);
             gzwd = dropdims(mean(gzwd,dims=1),dims=1);
 
-            eds,evar = erarawread(emod,epar,ereg,eroot,date)
-            etcw = evar[ilon,ilat,:]*1; close(eds)
+            pds,pvar = erarawread(pmod,ppar,preg,proot,date)
+            ipi  = pvar[plon,plat,:]*1; close(pds)
+            gtcw = gzwd .* ipi * 1000
 
-            irem = (.!ismissing.(gzwd)) .& (.!isnan.(gzwd));
-            etcw = etcw[irem]; gzwd = gzwd[irem]
-            gve[:,:,ii] = fit(Histogram,(gzwd,etcw),(gZWD,ePWV)).weights
+            cds,cvar = erarawread(cmod,cpar,creg,croot,date)
+            etcw = cvar[ilon,ilat,:]*1; close(cds)
+
+            irem = (.!ismissing.(gzwd)) .& (.!isnan.(gtcw));
+            etcw = etcw[irem]; gtcw = gtcw[irem]
+            gve[:,:,ii] = fit(Histogram,(gtcw,etcw),(gpwv,epwv)).weights
 
         end
 
@@ -55,6 +69,11 @@ mkpath(datadir("compiled")); gregioninfoadd(srcdir("gregionsadd.txt"))
 
 gstns = retrieveginfo()[:,1]
 for gstn in gstns
-    init,eroot = erastartup(aID=2,dID=1,path="/n/kuangdss01/lab/",welcome=false)
-    eravgnss(gstn,init,eroot)
+    init,croot = erastartup(aID=2,dID=1,path="/n/kuangdss01/lab/",welcome=false)
+    init,proot = erastartup(
+        aID=2,dID=1,
+        path="/n/kuangdss01/users/nwong/PiPWV",
+        welcome=false
+    )
+    eravgnss(gstn,init,croot,proot)
 end
