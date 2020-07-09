@@ -15,11 +15,20 @@ function eravgnss(
 )
 
     cmod,cpar,creg,etime = erainitialize(init,modID="msfc",parID="tcw",regID="SMT")
-    pmod,ppar,preg,_     = erainitialize(
-        init,
-        modID="csfc",parID="Pi_RE5",regID="SMT",
-        gres=1
-    )
+
+    if init["datasetID"] == 1
+        pmod,ppar,preg,_ = erainitialize(
+            init,
+            modID="csfc",parID="Pi_RE5",regID="SMT",
+            gres=1
+        )
+    else
+        pmod,ppar,preg,_ = erainitialize(
+            init,
+            modID="csfc",parID="Pi_REI",regID="SMT",
+            gres=1
+        )
+    end
 
     ginf = gstationinfo(gstn,retrieveginfo());
     glon = ginf["longitude"]; glat = ginf["latitude"]
