@@ -1,5 +1,7 @@
 using ClimateERA
 using ClimateSatellite
+using Dates
+using Logging
 using NCDatasets
 
 function pecurve(prcp::AbstractArray,tcwv::AbstractArray,tvec)
@@ -23,7 +25,10 @@ function tcwvVprcp_gpm(
 )
 
     global_logger(ConsoleLogger(stdout,Logging.Warn))
-    tmod,tpar,ereg,etime = erainitialize(init,modID="msfc",parID="tcwv");
+    tmod,tpar,ereg,etime = erainitialize(
+        init,
+        modID="msfc",parID="tcwv",regID=regID,timeID=timeID
+    );
     global_logger(ConsoleLogger(stdout,Logging.Info))
 
     nlon,nlat = ereg["size"]; lon = ereg["lon"]; lat = ereg["lat"]
@@ -70,10 +75,14 @@ function tcwvVprcp_era(
 )
 
     global_logger(ConsoleLogger(stdout,Logging.Warn))
-    tmod,tpar,ereg,etime = erainitialize(init,modID="msfc",parID="tcwv");
+    tmod,tpar,ereg,etime = erainitialize(
+        init,
+        modID="msfc",parID="tcwv",regID=regID,timeID=timeID
+    );
     pmod,ppar,____,_____ = erainitialize(init,modID="msfc",parID="prcp_tot");
     global_logger(ConsoleLogger(stdout,Logging.Info))
 
+    nlon,nlat = ereg["size"];
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
 
     tvec = collect(10:0.5:90); nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
@@ -132,14 +141,14 @@ function tcwvVprcpsave(
 
     nctcwv = defVar(ds,"tcwv",Int32,("tcwv",),attrib = Dict(
         "long_name" => "total_column_water_vapour",
-        "full_name" => "Total Column Water Vapour"
+        "full_name" => "Total Column Water Vapour",
         "units"     => "kg m^{-2}"
     ))
 
     ncprcp = defVar(ds,"prcp_avg",Int16,("longitude","latitude","tcwv"),attrib = Dict(
         "long_name" => "averaged_precipitation",
-        "full_name" => "Average Precipitation in Bin"
-        "units"     => "m"
+        "full_name" => "Average Precipitation in Bin",
+        "units"     => "m",
         "scale_factor"  => avgscale,
         "add_offset"    => avgoffset,
         "_FillValue"    => Int16(-32767),
@@ -148,7 +157,7 @@ function tcwvVprcpsave(
 
     ncbfrq = defVar(ds,"bin_frq",Int32,("longitude","latitude","tcwv"),attrib = Dict(
         "long_name" => "bin_frequency",
-        "full_name" => "Frequency of Occurrence in Bin"
+        "full_name" => "Frequency of Occurrence in Bin",
         "scale_factor"  => frqscale,
         "add_offset"    => frqoffset,
         "_FillValue"    => Int16(-32767),
