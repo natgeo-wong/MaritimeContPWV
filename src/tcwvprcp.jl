@@ -4,7 +4,7 @@ using Dates
 using Logging
 using NCDatasets
 
-function pecurve(prcp::AbstractArray,tcwv::AbstractArray,tvec)
+function pecurve(prcp::AbstractArray,tcwv::AbstractArray,tvec::Vector{<:Real},tsep::Real)
 
 
     pvec = zeros(length(tvec)); jj = 0;
@@ -34,10 +34,13 @@ function tcwvVprcp_gpm(
     nlon,nlat = ereg["size"]; lon = ereg["lon"]; lat = ereg["lat"]
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
 
+    @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against total column water ..."
+
     tvec = collect(10:0.5:90); nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
-    tmin = tvec .- tstep; tmax = tvec .+ tstep;
     pmat = Array{Float32,3}(undef,nlon,nlat,nvec)
     pfrq = Array{Int32,3}(undef,nlon,nlat,nvec)
+
+    @info "$(Dates.now()) - Extracting relevant closest-coordinate points of GPM precipitation for each of the ERA5 total column water grid points ..."
 
     lon,lat = gpmlonlat(); rlon,rlat,_ = gregiongridvec(reg,lon,lat);
     glon = zeros(nlon); for i = 1 : nlon; glon[i] = argmin(abs.(rlon .- lon[i])) end
@@ -45,8 +48,12 @@ function tcwvVprcp_gpm(
 
     for dtii in datevec
 
+        @info "$(Dates.now()) - Extracting ERA5 total column water data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(date)) $(Dates.monthname(date)) ..."
+
         ndy = daysinmonth(dtii)
         tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii); tcwv = tvar[:]*1; close(tds)
+
+        @info "$(Dates.now()) - Extracting GPM Precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(date)) $(Dates.monthname(date)) ..."
 
         pds,pvar = clisatrawread("gpmimerg","prcp_rate",regID,dtii,sroot);
         prcp  = pvar[:]*1; close(pds)
@@ -58,7 +65,7 @@ function tcwvVprcp_gpm(
             prcpii = @view prcp[rlon[glon[ilon]],rlat[glat[ilat]],:];
             itmp1 .= reshape(prcpii,2,:); itmp2 .= mean(itmp1,dims=1)
             tcwvii = @view tcwv[ilon,ilat,:]
-            pmat[ilon,ilat,:],pfrq[ilon,ilat,:] .= pecurve(itmp2,tcwvii,tvec)
+            pmat[ilon,ilat,:],pfrq[ilon,ilat,:] .= pecurve(itmp2,tcwvii,tvec,tstep)
 
         end
 
@@ -85,12 +92,15 @@ function tcwvVprcp_era(
     nlon,nlat = ereg["size"];
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
 
+    @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against total column water ..."
+
     tvec = collect(10:0.5:90); nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
-    tmin = tvec .- tstep; tmax = tvec .+ tstep;
     pmat = Array{Float32,3}(undef,nlon,nlat,nvec)
     pfrq = Array{Float32,3}(undef,nlon,nlat,nvec)
 
     for dtii in datevec
+
+        @info "$(Dates.now()) - Extracting ERA5 total column water and precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(date)) $(Dates.monthname(date)) ..."
 
         tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii); tcwv = tvar[:]*1; close(tds)
         pds,pvar = erarawread(pmod,ppar,ereg,eroot,dtii); prcp = pvar[:]*1; close(pds)
@@ -98,7 +108,7 @@ function tcwvVprcp_era(
         for ilat = 1 : nlat; ilon = 1 : nlon
 
             prcpii = @view prcp[ilon,ilat,:]; tcwvii = @view tcwv[ilon,ilat,:]
-            pmat[ilon,ilat,:],pfrq[ilon,ilat,:] .= pecurve(prcpii,tcwvii,tvec)
+            pmat[ilon,ilat,:],pfrq[ilon,ilat,:] .= pecurve(prcpii,tcwvii,tvec,tstep)
 
         end
 
