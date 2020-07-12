@@ -35,7 +35,7 @@ function tcwvVprcp_gpm(
     );
     global_logger(ConsoleLogger(stdout,Logging.Info))
 
-    nlon,nlat = ereg["size"]; lon = ereg["lon"]; lat = ereg["lat"]
+    nlon,nlat = ereg["size"]; elon = ereg["lon"]; elat = ereg["lat"]
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
 
     @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against total column water ..."
@@ -47,8 +47,8 @@ function tcwvVprcp_gpm(
     @info "$(Dates.now()) - Extracting relevant closest-coordinate points of GPM precipitation for each of the ERA5 total column water grid points ..."
 
     lon,lat = gpmlonlat(); rlon,rlat,_ = gregiongridvec(regID,lon,lat);
-    glon = zeros(Int32,nlon); for i = 1 : nlon; glon[i] = argmin(abs.(rlon .- lon[i])) end
-    glat = zeros(Int32,nlat); for i = 1 : nlat; glat[i] = argmin(abs.(rlat .- lat[i])) end
+    glon = zeros(Int32,nlon); for i = 1 : nlon; glon[i] = argmin(abs.(elon[i] .- rlon)) end
+    glat = zeros(Int32,nlat); for i = 1 : nlat; glat[i] = argmin(abs.(elat[i] .- rlat)) end
 
     for dtii in datevec
 
