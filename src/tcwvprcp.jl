@@ -67,7 +67,8 @@ function tcwvVprcp_gpm(
         for ilat = 1 : nlat, ilon = 1 : nlon
 
             prcpii = @view prcp[glon[ilon],glat[ilat],:];
-            itmp1 .= reshape(prcpii,2,:); itmp2 .= mean(itmp1,dims=1)
+            itmp1 .= reshape(prcpii,2,:);
+            itmp2 .= dropdims(mean(itmp1,dims=1),dims=1)
             tcwvii = @view tcwv[ilon,ilat,:]
             pmat[ilon,ilat,:],pfrq[ilon,ilat,:] = pecurve(itmp2,tcwvii,tvec,tstep)
 
