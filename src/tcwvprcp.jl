@@ -46,7 +46,7 @@ function tcwvVprcp_gpm(
 
     @info "$(Dates.now()) - Extracting relevant closest-coordinate points of GPM precipitation for each of the ERA5 total column water grid points ..."
 
-    lon,lat = gpmlonlat(); rlon,rlat,_ = gregiongridvec(reg,lon,lat);
+    lon,lat = gpmlonlat(); rlon,rlat,_ = gregiongridvec(regID,lon,lat);
     glon = zeros(nlon); for i = 1 : nlon; glon[i] = argmin(abs.(rlon .- lon[i])) end
     glat = zeros(nlat); for i = 1 : nlat; glat[i] = argmin(abs.(rlat .- lat[i])) end
 
@@ -129,7 +129,9 @@ function tcwvVprcpsave(
 
     @info "$(Dates.now()) - Saving binned averaged precipitation and frequency of bin occurrence in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(date)) $(Dates.monthname(date)) ..."
 
-    fnc = joinpath(datadir(),"$(prefix)-$(ereg["fol"])-tcwvVprcp-$(yrmo2str(date)).nc");
+    fol = datadir("$prefix/$(yr2str(date))"); if !isdir(fol); mkpath(fol) end
+
+    fnc = joinpath(fol,"$(prefix)-$(ereg["fol"])-tcwvVprcp-$(yrmo2str(date)).nc");
     if isfile(fnc)
         @info "$(Dates.now()) - Stale NetCDF file $(fnc) detected.  Overwriting ..."
         rm(fnc);

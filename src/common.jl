@@ -12,4 +12,5 @@ function ncoffsetscale(data::Array{<:Real})
 
 end
 
+yr2str(date::TimeType)   = Dates.format(date,dateformat"yyyy")
 yrmo2str(date::TimeType) = Dates.format(date,dateformat"yyyymm")
