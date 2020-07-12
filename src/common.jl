@@ -2,7 +2,9 @@ using Statistics
 
 function ncoffsetscale(data::Array{<:Real})
 
-    dmax = maximum(data); dmin = minimum(data);
+    dataii = @view data[.!isnan.(data)]
+
+    dmax = maximum(dataii); dmin = minimum(dataii);
     scale = (dmax-dmin) / 65533;
     offset = (dmax+dmin-scale) / 2;
 

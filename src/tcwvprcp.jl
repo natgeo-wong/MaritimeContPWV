@@ -136,11 +136,9 @@ function tcwvVprcpsave(
     end
     ds = NCDataset(fnc,"c",attrib = Dict("Conventions"=>"CF-1.6"));
 
-    avgscale,avgoffset = ncoffsetscale(pmat);
-
     ds.dim["longitude"] = ereg["size"][1];
     ds.dim["latitude"]  = ereg["size"][2];
-    ds.dim["tcwv"]      = length(tcwv)
+    ds.dim["tcwv"]      = length(tvec)
 
     nclongitude = defVar(ds,"longitude",Float32,("longitude",),attrib = Dict(
         "units"     => "degrees_east",
@@ -158,14 +156,10 @@ function tcwvVprcpsave(
         "units"     => "kg m^{-2}"
     ))
 
-    ncprcp = defVar(ds,"prcp_avg",Int16,("longitude","latitude","tcwv"),attrib = Dict(
+    ncprcp = defVar(ds,"prcp_avg",Float32,("longitude","latitude","tcwv"),attrib = Dict(
         "long_name" => "averaged_precipitation",
         "full_name" => "Average Precipitation in Bin",
         "units"     => "m",
-        "scale_factor"  => avgscale,
-        "add_offset"    => avgoffset,
-        "_FillValue"    => Int16(-32767),
-        "missing_value" => Int16(-32767),
     ))
 
     ncbfrq = defVar(ds,"bin_frq",Int64,("longitude","latitude","tcwv"),attrib = Dict(
@@ -174,7 +168,7 @@ function tcwvVprcpsave(
     ))
 
     nclongitude[:] = ereg["lon"]; nclatitude[:] = ereg["lat"]
-    ncprcp[:] = pmat; ncbfrq[:] = pfrq;
+    nctcwv[:] = tvec; ncprcp[:] = pmat; ncbfrq[:] = pfrq;
 
     close(ds)
 
