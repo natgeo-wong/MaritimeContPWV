@@ -6,11 +6,13 @@ using Logging
 using NCDatasets
 using Statistics
 
+include(srcdir("common.jl"))
+
 function pecurve(prcp::AbstractArray,tcwv::AbstractArray,tvec::Vector{<:Real},tsep::Real)
 
 
     pvec = zeros(length(tvec)); jj = 0;
-    pfrq = zeros(Int32,length(tvec))
+    pfrq = zeros(Int64,length(tvec))
     for tii in tvec
         pii = @view prcp[ (tcwv.>(tii-tsep)) .& (tcwv.<(tii+tsep)) ]
         jj = jj + 1; pvec[jj] = mean(pii); pfrq[jj] = length(pii)
@@ -40,7 +42,7 @@ function tcwvVprcp_gpm(
 
     tvec = collect(10:0.5:90); nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
     pmat = Array{Float32,3}(undef,nlon,nlat,nvec)
-    pfrq = Array{Int32,3}(undef,nlon,nlat,nvec)
+    pfrq = Array{Int64,3}(undef,nlon,nlat,nvec)
 
     @info "$(Dates.now()) - Extracting relevant closest-coordinate points of GPM precipitation for each of the ERA5 total column water grid points ..."
 
@@ -98,7 +100,7 @@ function tcwvVprcp_era(
 
     tvec = collect(10:0.5:90); nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
     pmat = Array{Float32,3}(undef,nlon,nlat,nvec)
-    pfrq = Array{Float32,3}(undef,nlon,nlat,nvec)
+    pfrq = Array{Int64,3}(undef,nlon,nlat,nvec)
 
     for dtii in datevec
 
@@ -134,8 +136,7 @@ function tcwvVprcpsave(
     end
     ds = NCDataset(fnc,"c",attrib = Dict("Conventions"=>"CF-1.6"));
 
-    avgscale,avgoffset = erancoffsetscale(pmat);
-    frqscale,frqoffset = erancoffsetscale(pfrq);
+    avgscale,avgoffset = ncoffsetscale(pmat);
 
     ds.dim["longitude"] = ereg["size"][1];
     ds.dim["latitude"]  = ereg["size"][2];
@@ -167,13 +168,9 @@ function tcwvVprcpsave(
         "missing_value" => Int16(-32767),
     ))
 
-    ncbfrq = defVar(ds,"bin_frq",Int32,("longitude","latitude","tcwv"),attrib = Dict(
+    ncbfrq = defVar(ds,"bin_frq",Int64,("longitude","latitude","tcwv"),attrib = Dict(
         "long_name" => "bin_frequency",
         "full_name" => "Frequency of Occurrence in Bin",
-        "scale_factor"  => frqscale,
-        "add_offset"    => frqoffset,
-        "_FillValue"    => Int16(-32767),
-        "missing_value" => Int16(-32767),
     ))
 
     nclongitude[:] = ereg["lon"]; nclatitude[:] = ereg["lat"]
