@@ -117,7 +117,7 @@ function tcwvVprcp_era(
 
         end
 
-        tcwvVprcpsave(pmat,pfrq,tvec,ereg,dtii,"era")
+        pmat[isnan.(pmat)] .= 0; tcwvVprcpsave(pmat,pfrq,tvec,ereg,dtii,"era")
 
     end
 
@@ -153,7 +153,7 @@ function tcwvVprcpsave(
         "long_name" => "latitude",
     ))
 
-    nctcwv = defVar(ds,"tcwv",Int32,("tcwv",),attrib = Dict(
+    nctcwv = defVar(ds,"tcwv",Float32,("tcwv",),attrib = Dict(
         "long_name" => "total_column_water_vapour",
         "full_name" => "Total Column Water Vapour",
         "units"     => "kg m^{-2}"

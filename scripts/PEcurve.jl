@@ -45,6 +45,7 @@ function pecompile(
         ds   = Dataset(fnc); prcp_avg = ds["prcp_avg"][:]; bin_frq = ds["bin_frq"][:]
 
         @info "$(Dates.now()) - Adding P-E curve information for $(year(dtii)) $(Dates.monthname(dtii)) ..."
+        prcp_avg[isnan.(prcp_avg)] .= 0;
         prcp += prcp_avg .* bin_frq; freq += bin_frq; close(ds)
 
     end
