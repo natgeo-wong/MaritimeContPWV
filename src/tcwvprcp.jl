@@ -50,24 +50,24 @@ function tcwvVprcp_gpm(
 
     for dtii in datevec
 
-        @info "$(Dates.now()) - Extracting ERA5 total column water data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(date)) $(Dates.monthname(date)) ..."
+        @info "$(Dates.now()) - Extracting ERA5 total column water data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
 
         ndy = daysinmonth(dtii)
         tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii); tcwv = tvar[:]*1; close(tds)
 
-        @info "$(Dates.now()) - Extracting GPM Precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(date)) $(Dates.monthname(date)) ..."
+        @info "$(Dates.now()) - Extracting GPM Precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
 
         pds,pvar = clisatrawread("gpmimerg","prcp_rate",regID,dtii,sroot);
         prcp  = pvar[:]*1; close(pds)
         itmp1 = Array{Float32,2}(undef,2,24*ndy)
         itmp2 = Array{Float32,1}(undef,24*ndy)
 
-        for ilat = 1 : nlat; ilon = 1 : nlon
+        for ilat = 1 : nlat, ilon = 1 : nlon
 
             prcpii = @view prcp[rlon[glon[ilon]],rlat[glat[ilat]],:];
             itmp1 .= reshape(prcpii,2,:); itmp2 .= mean(itmp1,dims=1)
             tcwvii = @view tcwv[ilon,ilat,:]
-            pmat[ilon,ilat,:],pfrq[ilon,ilat,:] .= pecurve(itmp2,tcwvii,tvec,tstep)
+            pmat[ilon,ilat,:],pfrq[ilon,ilat,:] = pecurve(itmp2,tcwvii,tvec,tstep)
 
         end
 
@@ -102,15 +102,15 @@ function tcwvVprcp_era(
 
     for dtii in datevec
 
-        @info "$(Dates.now()) - Extracting ERA5 total column water and precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(date)) $(Dates.monthname(date)) ..."
+        @info "$(Dates.now()) - Extracting ERA5 total column water and precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
 
         tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii); tcwv = tvar[:]*1; close(tds)
         pds,pvar = erarawread(pmod,ppar,ereg,eroot,dtii); prcp = pvar[:]*1; close(pds)
 
-        for ilat = 1 : nlat; ilon = 1 : nlon
+        for ilat = 1 : nlat, ilon = 1 : nlon
 
             prcpii = @view prcp[ilon,ilat,:]; tcwvii = @view tcwv[ilon,ilat,:]
-            pmat[ilon,ilat,:],pfrq[ilon,ilat,:] .= pecurve(prcpii,tcwvii,tvec,tstep)
+            pmat[ilon,ilat,:],pfrq[ilon,ilat,:] = pecurve(prcpii,tcwvii,tvec,tstep)
 
         end
 
