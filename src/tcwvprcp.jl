@@ -47,8 +47,8 @@ function tcwvVprcp_gpm(
     @info "$(Dates.now()) - Extracting relevant closest-coordinate points of GPM precipitation for each of the ERA5 total column water grid points ..."
 
     lon,lat = gpmlonlat(); rlon,rlat,_ = gregiongridvec(regID,lon,lat);
-    glon = zeros(nlon); for i = 1 : nlon; glon[i] = argmin(abs.(rlon .- lon[i])) end
-    glat = zeros(nlat); for i = 1 : nlat; glat[i] = argmin(abs.(rlat .- lat[i])) end
+    glon = zeros(Int32,nlon); for i = 1 : nlon; glon[i] = argmin(abs.(rlon .- lon[i])) end
+    glat = zeros(Int32,nlat); for i = 1 : nlat; glat[i] = argmin(abs.(rlat .- lat[i])) end
 
     for dtii in datevec
 
@@ -66,7 +66,7 @@ function tcwvVprcp_gpm(
 
         for ilat = 1 : nlat, ilon = 1 : nlon
 
-            prcpii = @view prcp[rlon[glon[ilon]],rlat[glat[ilat]],:];
+            prcpii = @view prcp[glon[ilon],glat[ilat],:];
             itmp1 .= reshape(prcpii,2,:); itmp2 .= mean(itmp1,dims=1)
             tcwvii = @view tcwv[ilon,ilat,:]
             pmat[ilon,ilat,:],pfrq[ilon,ilat,:] = pecurve(itmp2,tcwvii,tvec,tstep)
