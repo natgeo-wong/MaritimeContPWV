@@ -11,3 +11,5 @@ function ncoffsetscale(data::Array{<:Real})
     return scale,offset
 
 end
+
+yrmo2str(date::TimeType) = Dates.format(date,dateformat"yyyymm")

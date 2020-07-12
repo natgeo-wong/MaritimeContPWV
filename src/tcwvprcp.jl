@@ -129,7 +129,7 @@ function tcwvVprcpsave(
 
     @info "$(Dates.now()) - Saving binned averaged precipitation and frequency of bin occurrence in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(date)) $(Dates.monthname(date)) ..."
 
-    fnc = joinpath(datadir(),"$(prefix)-$(ereg["fol"])-tcwvVprcp.nc");
+    fnc = joinpath(datadir(),"$(prefix)-$(ereg["fol"])-tcwvVprcp-$(yrmo2str(date)).nc");
     if isfile(fnc)
         @info "$(Dates.now()) - Stale NetCDF file $(fnc) detected.  Overwriting ..."
         rm(fnc);
