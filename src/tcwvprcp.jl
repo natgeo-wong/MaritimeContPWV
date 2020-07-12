@@ -1,8 +1,10 @@
 using ClimateERA
 using ClimateSatellite
 using Dates
+using GeoRegions
 using Logging
 using NCDatasets
+using Statistics
 
 function pecurve(prcp::AbstractArray,tcwv::AbstractArray,tvec::Vector{<:Real},tsep::Real)
 
