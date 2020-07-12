@@ -59,7 +59,7 @@ function tcwvVprcp_gpm(
 
         @info "$(Dates.now()) - Extracting GPM Precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
 
-        pds,pvar = clisatrawread("gpmimerg","prcp_rate",regID,dtii,sroot);
+        pds,pvar = clisatrawread("gpmimerg","prcp_rate",dtii,regID,path=sroot);
         prcp  = pvar[:]*1; close(pds)
         itmp1 = Array{Float32,2}(undef,2,24*ndy)
         itmp2 = Array{Float32,1}(undef,24*ndy)
