@@ -18,10 +18,10 @@ This repository contains the basic setup for the **MaritimeContPWV** project, us
 
 * [ ] Compare between different Precipitable Water datasets
   - [ ] Compare ERA5 and ERA-Interim TCWV with TCW
-  - [ ] Over land, compare GNSS PWV with ERA5 and ERA-Interim TCWV
+  - [x] Over land, compare GNSS PWV with ERA5 and ERA-Interim TCWV
   - [ ] Over ocean, compare ERA5 and ERA-Interim TCWV with MIMIC-TPW2m
 * [ ] Produce TPW-Precipitation curve over land, ocean and coastline
-  - [ ] General overview curve
+  - [x] General overview curve
   - [ ] Compare curve in different times of year / season
   - [ ] Compare against MJO-Phase/Amplitude data
 
@@ -34,7 +34,6 @@ In order to obtain the relevant data, please follow the instructions listed belo
 The entire codebase is written in Julia.  If the data files are downloaded, you should be able to produce my results in their entirety.  The following are the most important Julia packages that were used in this project:
 * Satellite Data Handling: `ClimateSatellite.jl`
 * ECWMF Data Handling: `ClimateERA.jl`
-* GNSS ZWD Data Handling: `ClimateGNSS.jl`
 * NetCDF Data Handling: `NCDatasets.jl`
 
 In order to reproduce the results, first you have to clone the repository, and instantiate the project environment in the Julia REPL in order to install the required packages:
