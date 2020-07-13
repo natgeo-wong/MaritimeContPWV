@@ -14,7 +14,7 @@ function pecurve(prcp::AbstractArray,tcwv::AbstractArray,tvec::Vector{<:Real},ts
     pvec = zeros(length(tvec)); jj = 0;
     pfrq = zeros(Int64,length(tvec))
     for tii in tvec
-        pii = @view prcp[ (tcwv.>(tii-tsep)) .& (tcwv.<(tii+tsep)) ]
+        pii = @view prcp[ (tcwv.>(tii-tsep)) .& (tcwv.<=(tii+tsep)) ]
         jj = jj + 1; pvec[jj] = mean(pii); pfrq[jj] = length(pii)
     end
 
