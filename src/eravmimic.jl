@@ -1,0 +1,247 @@
+using ClimateERA
+using ClimateSatellite
+using Dates
+using GeoRegions
+using JLD2
+using Logging
+using NCDatasets
+using StatsBase
+
+include(srcdir("common.jl"))
+
+function eravmimic(
+    init::AbstractDict, eroot::AbstractDict, sroot::AbstractString;
+    regID::AbstractString="GLB",
+    timeID::Union{Integer,Vector}=0,
+    mpwv::AbstractRange=0:100, epwv::AbstractRange=0:100
+)
+
+    global_logger(ConsoleLogger(stdout,Logging.Warn))
+    tmod,tpar,ereg,etime = erainitialize(
+        init,
+        modID="msfc",parID="tcwv",regID=regID,timeID=timeID
+    );
+    global_logger(ConsoleLogger(stdout,Logging.Info))
+
+    nlon,nlat = ereg["size"]; elon = ereg["lon"]; elat = ereg["lat"]
+    datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
+
+    @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against total column water ..."
+
+    evm = zeros(Int32,nlon,nlat,npwv-1,epwv-1);
+
+    for dtii in datevec
+
+        @info "$(Dates.now()) - Extracting ERA5 total column water data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
+
+        tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii); tcw = tvar[:]*1; close(tds)
+
+        @info "$(Dates.now()) - Extracting MIMIC total precipitable water data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: 0.25) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
+
+        mds,mvar = clisatrawread("mtpw2m","tpw",dtii,regID,path=sroot);
+        tpw = mvar[:]*1; close(mds)
+
+        for ilat = 1 : nlat, ilon = 1 : nlon
+
+            mtpwii = @view tpw[ilon,ilat,:]
+            etcwii = @view tcw[ilon,ilat,:]
+            evm[ilon,ilat,:,:] .= fit(Histogram,(mtpwii,etcwii),(mpwv,epwv)).weights
+
+        end
+
+        eravmimicsave(evm,mpwv,epwv,ereg,dtii)
+
+    end
+
+    evm = zeros(Int32,nlon,nlat,npwv-1,epwv-1);
+
+    for dtii in datevec
+
+        fol = datadir("eravmimic/$(yr2str(date))")
+        fnc = joinpath(fol,"eravmimic-$(ereg["fol"])-$(yrmo2str(date)).nc")
+        ds  = NCDataset(fnc); evm += ds["bin_frq"][:]; close(ds)
+
+    end
+
+    eravmimicsave(evm,mpwv,epwv,ereg)
+
+    evmcorr = zeros(Int32,nlon,nlat);
+    nhr  = length(Date(etime["Begin"],1):Hour(1):Date(etime["End"]+1,1)) - 1
+    etmp = zeros(nhr); mtmp = zeros(nhr)
+
+    for ilat = 1 : nlat, ilon = 1 : nlon; ibeg = 1; iend = 0;
+
+        for dtii in datevec
+
+            tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii);
+            mds,mvar = clisatrawread("mtpw2m","tpw",dtii,regID,path=sroot);
+
+            iend += 24 * daysinmonth(dtii)
+            mtmp[ibeg:iend,1] = mvar[ilon,ilat,:]
+            etmp[ibeg:iend,2] = tvar[ilon,ilat,:]
+
+            close(tds); close(mds); ibeg += 24 * daysinmonth(dtii)
+
+        end
+
+        evmcorr[ilon,ilat] = cor(mtmp,etmp)
+
+    end
+
+    eravmimicsave(evmcorr,ereg)
+
+end
+
+function eravmimicsave(
+    evm::Array{<:Real,4}, mpwv::Vector{<:Real}, epwv::Vector{<:Real},
+    ereg::Dict, date::TimeType
+)
+
+    @info "$(Dates.now()) - Saving binned frequencies for MIMIC vs ERA5 Total Column Water in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(date)) $(Dates.monthname(date)) ..."
+
+    fol = datadir("eravmimic/$(yr2str(date))"); if !isdir(fol); mkpath(fol) end
+
+    fnc = joinpath(fol,"eravmimic-$(ereg["fol"])-$(yrmo2str(date)).nc");
+    if isfile(fnc)
+        @info "$(Dates.now()) - Stale NetCDF file $(fnc) detected.  Overwriting ..."
+        rm(fnc);
+    end
+    ds = NCDataset(fnc,"c",attrib = Dict("Conventions"=>"CF-1.6"));
+
+    ds.dim["longitude"] = ereg["size"][1];
+    ds.dim["latitude"]  = ereg["size"][2];
+    ds.dim["etcw"]      = length(epwv)
+    ds.dim["mtcw"]      = length(mpwv)
+
+    nclongitude = defVar(ds,"longitude",Float32,("longitude",),attrib = Dict(
+        "units"     => "degrees_east",
+        "long_name" => "longitude",
+    ))
+
+    nclatitude = defVar(ds,"latitude",Float32,("latitude",),attrib = Dict(
+        "units"     => "degrees_north",
+        "long_name" => "latitude",
+    ))
+
+    ncmtcw = defVar(ds,"mtcw",Float32,("mtcw",),attrib = Dict(
+        "long_name" => "mimic_total_column_water_vapour",
+        "full_name" => "Total Column Water Vapour (MIMIC)",
+        "units"     => "kg m^{-2}"
+    ))
+
+    ncetcw = defVar(ds,"etcw",Float32,("etcw"),attrib = Dict(
+        "long_name" => "era5_total_column_water_vapour",
+        "full_name" => "Total Column Water Vapour (ERA5)",
+        "units"     => "kg m^{-2}"
+    ))
+
+    ncbfrq = defVar(ds,"bin_frq",Int32,("longitude","latitude","mtcw","etcw"),attrib = Dict(
+        "long_name" => "bin_frequency",
+        "full_name" => "Frequency of Occurrence in Bin",
+    ))
+
+    nclongitude[:] = ereg["lon"]; nclatitude[:] = ereg["lat"]
+    ncmtcw[:] = tvec; ncetcw[:] = pmat; ncbfrq[:] = evm;
+
+    close(ds)
+
+    @info "$(Dates.now()) - Binned frequencies for MIMIC vs ERA5 Total Column Water in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(date)) $(Dates.monthname(date)) has been saved into $(fnc)."
+
+end
+
+function eravmimicsave(
+    evm::Array{<:Real,4}, mpwv::Vector{<:Real}, epwv::Vector{<:Real}, ereg::Dict
+)
+
+    @info "$(Dates.now()) - Saving binned frequencies for MIMIC vs ERA5 Total Column Water in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for all dates ..."
+
+    fol = datadir("compiled"); if !isdir(fol); mkpath(fol) end
+
+    fnc = joinpath(fol,"eravmimic-$(ereg["fol"]).nc");
+    if isfile(fnc)
+        @info "$(Dates.now()) - Stale NetCDF file $(fnc) detected.  Overwriting ..."
+        rm(fnc);
+    end
+    ds = NCDataset(fnc,"c",attrib = Dict("Conventions"=>"CF-1.6"));
+
+    ds.dim["longitude"] = ereg["size"][1];
+    ds.dim["latitude"]  = ereg["size"][2];
+    ds.dim["etcw"]      = length(epwv)
+    ds.dim["mtcw"]      = length(mpwv)
+
+    nclongitude = defVar(ds,"longitude",Float32,("longitude",),attrib = Dict(
+        "units"     => "degrees_east",
+        "long_name" => "longitude",
+    ))
+
+    nclatitude = defVar(ds,"latitude",Float32,("latitude",),attrib = Dict(
+        "units"     => "degrees_north",
+        "long_name" => "latitude",
+    ))
+
+    ncmtcw = defVar(ds,"mtcw",Float32,("mtcw",),attrib = Dict(
+        "long_name" => "mimic_total_column_water_vapour",
+        "full_name" => "Total Column Water Vapour (MIMIC)",
+        "units"     => "kg m^{-2}"
+    ))
+
+    ncetcw = defVar(ds,"etcw",Float32,("etcw"),attrib = Dict(
+        "long_name" => "era5_total_column_water_vapour",
+        "full_name" => "Total Column Water Vapour (ERA5)",
+        "units"     => "kg m^{-2}"
+    ))
+
+    ncbfrq = defVar(ds,"bin_frq",Int32,("longitude","latitude","mtcw","etcw"),attrib = Dict(
+        "long_name" => "bin_frequency",
+        "full_name" => "Frequency of Occurrence in Bin",
+    ))
+
+    nclongitude[:] = ereg["lon"]; nclatitude[:] = ereg["lat"]
+    ncmtcw[:] = tvec; ncetcw[:] = pmat; ncbfrq[:] = evm;
+
+    close(ds)
+
+    @info "$(Dates.now()) - Binned frequencies for MIMIC vs ERA5 Total Column Water in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for all dates has been saved into $(fnc)."
+
+end
+
+function eravmimicsave(
+    evmcorr::Array{<:Real,4}, ereg::Dict
+)
+
+    @info "$(Dates.now()) - Saving correlation for MIMIC vs ERA5 Total Column Water in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for all dates ..."
+
+    fol = datadir("compiled"); if !isdir(fol); mkpath(fol) end
+
+    fnc = joinpath(fol,"eravmimic-$(ereg["fol"])-corr.nc");
+    if isfile(fnc)
+        @info "$(Dates.now()) - Stale NetCDF file $(fnc) detected.  Overwriting ..."
+        rm(fnc);
+    end
+    ds = NCDataset(fnc,"c",attrib = Dict("Conventions"=>"CF-1.6"));
+
+    ds.dim["longitude"] = ereg["size"][1];
+    ds.dim["latitude"]  = ereg["size"][2];
+
+    nclongitude = defVar(ds,"longitude",Float32,("longitude",),attrib = Dict(
+        "units"     => "degrees_east",
+        "long_name" => "longitude",
+    ))
+
+    nclatitude = defVar(ds,"latitude",Float32,("latitude",),attrib = Dict(
+        "units"     => "degrees_north",
+        "long_name" => "latitude",
+    ))
+
+    ncbfrq = defVar(ds,"rho",Int32,("longitude","latitude","mtcw","etcw"),attrib = Dict(
+        "long_name" => "pearson_correlation",
+        "full_name" => "Pearson Correlation Coefficient",
+    ))
+
+    nclongitude[:] = ereg["lon"]; nclatitude[:] = ereg["lat"]; nccorr[:] = evmcorr;
+
+    close(ds)
+
+    @info "$(Dates.now()) - Correlation for MIMIC vs ERA5 Total Column Water in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for all dates has been saved into $(fnc)."
+
+end

@@ -1,6 +1,3 @@
-using DrWatson
-@quickactivate "MaritimeContPWV"
-
 using ClimateERA
 using GeoRegions
 using JLD2
@@ -136,21 +133,4 @@ function era5vgnss_6hourly(
     gve = @view gve[:,:,1:ii]; gve = dropdims(sum(gve,dims=3),dims=3)
     @save "$(datadir("compiled/era6/$(gstn).jld2"))" gve
 
-end
-
-init,eroot = erastartup(aID=2,dID=1,path="/n/kuangdss01/lab/")
-mkpath(datadir("compiled/era5"));
-mkpath(datadir("compiled/erai"));
-mkpath(datadir("compiled/era6"));
-gregioninfoadd(srcdir("gregionsadd.txt"))
-
-gstns = retrieveginfo()[:,1]
-for gstn in gstns
-    init,croot = erastartup(aID=2,dID=1,path="/n/kuangdss01/lab/",welcome=false)
-    init,proot = erastartup(
-        aID=2,dID=1,
-        path="/n/kuangdss01/users/nwong/PiPWV",
-        welcome=false
-    )
-    eravgnss(gstn,init,croot,proot)
 end
