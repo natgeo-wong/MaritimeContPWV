@@ -26,7 +26,7 @@ function eravmimic(
     nlon,nlat = ereg["size"]; elon = ereg["lon"]; elat = ereg["lat"]
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
 
-    @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against total column water ..."
+    @info "$(Dates.now()) - Preallocating data arrays to compare ERA5 Total Column Water against MIMIC Total Precipitable Water ..."
 
     evm = zeros(Int32,nlon,nlat,npwv-1,epwv-1);
 
@@ -41,9 +41,9 @@ function eravmimic(
         mds,mvar = clisatrawread("mtpw2m","tpw",dtii,regID,path=sroot);
         tpw = mvar[:]*1; close(mds)
 
-        for ilat = 1 : nlat, ilon = 1 : nlon
+        for ilat = 1 : nlat, ilon = 1 : nlon; mlat = nlat + 1 - ilat
 
-            mtpwii = @view tpw[ilon,ilat,:]
+            mtpwii = @view tpw[ilon,mlat,:]
             etcwii = @view tcw[ilon,ilat,:]
             evm[ilon,ilat,:,:] .= fit(Histogram,(mtpwii,etcwii),(mpwv,epwv)).weights
 
@@ -52,6 +52,8 @@ function eravmimic(
         eravmimicsave(evm,mpwv,epwv,ereg,dtii)
 
     end
+
+    @info "$(Dates.now()) - Preallocating data arrays to compile the comparison between ERA5 Total Column Water against MIMIC Total Precipitable Water ..."
 
     evm = zeros(Int32,nlon,nlat,npwv-1,epwv-1);
 
@@ -65,11 +67,13 @@ function eravmimic(
 
     eravmimicsave(evm,mpwv,epwv,ereg)
 
+    @info "$(Dates.now()) - Preallocating data arrays to find the correlation gridpoint by gridpoint between ERA5 and MIMIC data ..."
+
     evmcorr = zeros(Int32,nlon,nlat);
-    nhr  = length(Date(etime["Begin"],1):Hour(1):Date(etime["End"]+1,1)) - 1
+    nhr  = length(DateTime(etime["Begin"],1):Hour(1):DateTime(etime["End"]+1,1)) - 1
     etmp = zeros(nhr); mtmp = zeros(nhr)
 
-    for ilat = 1 : nlat, ilon = 1 : nlon; ibeg = 1; iend = 0;
+    for ilat = 1 : nlat, ilon = 1 : nlon; ibeg = 1; iend = 0; ; mlat = nlat + 1 - ilat
 
         for dtii in datevec
 
@@ -77,7 +81,7 @@ function eravmimic(
             mds,mvar = clisatrawread("mtpw2m","tpw",dtii,regID,path=sroot);
 
             iend += 24 * daysinmonth(dtii)
-            mtmp[ibeg:iend,1] = mvar[ilon,ilat,:]
+            mtmp[ibeg:iend,1] = mvar[ilon,mlat,:]
             etmp[ibeg:iend,2] = tvar[ilon,ilat,:]
 
             close(tds); close(mds); ibeg += 24 * daysinmonth(dtii)
