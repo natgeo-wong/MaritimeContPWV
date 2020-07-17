@@ -13,7 +13,7 @@ function eravmimic(
     init::AbstractDict, eroot::AbstractDict, sroot::AbstractString;
     regID::AbstractString="GLB",
     timeID::Union{Integer,Vector}=0,
-    mpwv::AbstractRange=0:100, epwv::AbstractRange=0:100
+    pwv::AbstractRange=0:100
 )
 
     global_logger(ConsoleLogger(stdout,Logging.Warn))
@@ -23,12 +23,13 @@ function eravmimic(
     );
     global_logger(ConsoleLogger(stdout,Logging.Info))
 
-    nlon,nlat = ereg["size"]; elon = ereg["lon"]; elat = ereg["lat"]
+    nlon,nlat = ereg["size"]; npwv = length(pwv)
+    elon = ereg["lon"]; elat = ereg["lat"]
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
 
     @info "$(Dates.now()) - Preallocating data arrays to compare ERA5 Total Column Water against MIMIC Total Precipitable Water ..."
 
-    evm = zeros(Int32,nlon,nlat,npwv-1,epwv-1);
+    evm = zeros(Int32,nlon,nlat,npwv-1,npwv-1);
 
     for dtii in datevec
 
@@ -45,17 +46,17 @@ function eravmimic(
 
             mtpwii = @view tpw[ilon,mlat,:]
             etcwii = @view tcw[ilon,ilat,:]
-            evm[ilon,ilat,:,:] .= fit(Histogram,(mtpwii,etcwii),(mpwv,epwv)).weights
+            evm[ilon,ilat,:,:] .= fit(Histogram,(mtpwii,etcwii),(pwv,pwv)).weights
 
         end
 
-        eravmimicsave(evm,mpwv,epwv,ereg,dtii)
+        eravmimicsave(evm,pwv,ereg,dtii)
 
     end
 
     @info "$(Dates.now()) - Preallocating data arrays to compile the comparison between ERA5 Total Column Water against MIMIC Total Precipitable Water ..."
 
-    evm = zeros(Int32,nlon,nlat,npwv-1,epwv-1);
+    evm = zeros(Int32,nlon,nlat,npwv-1,npwv-1);
 
     for dtii in datevec
 
@@ -65,7 +66,7 @@ function eravmimic(
 
     end
 
-    eravmimicsave(evm,mpwv,epwv,ereg)
+    eravmimicsave(evm,pwv,ereg)
 
     @info "$(Dates.now()) - Preallocating data arrays to find the correlation gridpoint by gridpoint between ERA5 and MIMIC data ..."
 
@@ -97,7 +98,7 @@ function eravmimic(
 end
 
 function eravmimicsave(
-    evm::Array{<:Real,4}, mpwv::Vector{<:Real}, epwv::Vector{<:Real},
+    evm::Array{<:Real,4}, pwv::AbstractRange,
     ereg::Dict, date::TimeType
 )
 
@@ -112,10 +113,10 @@ function eravmimicsave(
     end
     ds = NCDataset(fnc,"c",attrib = Dict("Conventions"=>"CF-1.6"));
 
-    ds.dim["longitude"] = ereg["size"][1];
-    ds.dim["latitude"]  = ereg["size"][2];
-    ds.dim["etcw"]      = length(epwv)
-    ds.dim["mtcw"]      = length(mpwv)
+    ds.dim["longitude"] = ereg["size"][1]
+    ds.dim["latitude"]  = ereg["size"][2]
+    ds.dim["pwv"]       = length(pwv)
+    ds.dim["bin"]       = length(pwv) - 1
 
     nclongitude = defVar(ds,"longitude",Float32,("longitude",),attrib = Dict(
         "units"     => "degrees_east",
@@ -127,25 +128,19 @@ function eravmimicsave(
         "long_name" => "latitude",
     ))
 
-    ncmtcw = defVar(ds,"mtcw",Float32,("mtcw",),attrib = Dict(
-        "long_name" => "mimic_total_column_water_vapour",
-        "full_name" => "Total Column Water Vapour (MIMIC)",
+    ncpwv = defVar(ds,"pwv",Float32,("pwv",),attrib = Dict(
+        "long_name" => "total_column_water_vapour",
+        "full_name" => "Total Column Water Vapour",
         "units"     => "kg m^{-2}"
     ))
 
-    ncetcw = defVar(ds,"etcw",Float32,("etcw"),attrib = Dict(
-        "long_name" => "era5_total_column_water_vapour",
-        "full_name" => "Total Column Water Vapour (ERA5)",
-        "units"     => "kg m^{-2}"
-    ))
-
-    ncbfrq = defVar(ds,"bin_frq",Int32,("longitude","latitude","mtcw","etcw"),attrib = Dict(
+    ncbfrq = defVar(ds,"bin_frq",Int32,("longitude","latitude","bin","bin"),attrib = Dict(
         "long_name" => "bin_frequency",
         "full_name" => "Frequency of Occurrence in Bin",
     ))
 
     nclongitude[:] = ereg["lon"]; nclatitude[:] = ereg["lat"]
-    ncmtcw[:] = tvec; ncetcw[:] = pmat; ncbfrq[:] = evm;
+    ncpwv[:] = collect(pwv); ncbfrq[:] = evm;
 
     close(ds)
 
@@ -154,7 +149,7 @@ function eravmimicsave(
 end
 
 function eravmimicsave(
-    evm::Array{<:Real,4}, mpwv::Vector{<:Real}, epwv::Vector{<:Real}, ereg::Dict
+    evm::Array{<:Real,4}, pwv::AbstractRange, ereg::Dict
 )
 
     @info "$(Dates.now()) - Saving binned frequencies for MIMIC vs ERA5 Total Column Water in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for all dates ..."
@@ -168,10 +163,10 @@ function eravmimicsave(
     end
     ds = NCDataset(fnc,"c",attrib = Dict("Conventions"=>"CF-1.6"));
 
-    ds.dim["longitude"] = ereg["size"][1];
-    ds.dim["latitude"]  = ereg["size"][2];
-    ds.dim["etcw"]      = length(epwv)
-    ds.dim["mtcw"]      = length(mpwv)
+    ds.dim["longitude"] = ereg["size"][1]
+    ds.dim["latitude"]  = ereg["size"][2]
+    ds.dim["pwv"]       = length(pwv)
+    ds.dim["bin"]       = length(pwv) - 1
 
     nclongitude = defVar(ds,"longitude",Float32,("longitude",),attrib = Dict(
         "units"     => "degrees_east",
@@ -183,25 +178,19 @@ function eravmimicsave(
         "long_name" => "latitude",
     ))
 
-    ncmtcw = defVar(ds,"mtcw",Float32,("mtcw",),attrib = Dict(
-        "long_name" => "mimic_total_column_water_vapour",
-        "full_name" => "Total Column Water Vapour (MIMIC)",
+    ncpwv = defVar(ds,"pwv",Float32,("pwv",),attrib = Dict(
+        "long_name" => "total_column_water_vapour",
+        "full_name" => "Total Column Water Vapour",
         "units"     => "kg m^{-2}"
     ))
 
-    ncetcw = defVar(ds,"etcw",Float32,("etcw"),attrib = Dict(
-        "long_name" => "era5_total_column_water_vapour",
-        "full_name" => "Total Column Water Vapour (ERA5)",
-        "units"     => "kg m^{-2}"
-    ))
-
-    ncbfrq = defVar(ds,"bin_frq",Int32,("longitude","latitude","mtcw","etcw"),attrib = Dict(
+    ncbfrq = defVar(ds,"bin_frq",Int32,("longitude","latitude","bin","bin"),attrib = Dict(
         "long_name" => "bin_frequency",
         "full_name" => "Frequency of Occurrence in Bin",
     ))
 
     nclongitude[:] = ereg["lon"]; nclatitude[:] = ereg["lat"]
-    ncmtcw[:] = tvec; ncetcw[:] = pmat; ncbfrq[:] = evm;
+    ncpwv[:] = collect(pwv); ncbfrq[:] = evm;
 
     close(ds)
 
@@ -237,7 +226,7 @@ function eravmimicsave(
         "long_name" => "latitude",
     ))
 
-    ncbfrq = defVar(ds,"rho",Int32,("longitude","latitude","mtcw","etcw"),attrib = Dict(
+    nccorr = defVar(ds,"rho",Int32,("longitude","latitude"),attrib = Dict(
         "long_name" => "pearson_correlation",
         "full_name" => "Pearson Correlation Coefficient",
     ))
