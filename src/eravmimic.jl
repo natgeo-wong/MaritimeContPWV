@@ -60,6 +60,8 @@ function eravmimic(
 
     for dtii in datevec
 
+        @info "$(Dates.now()) - Extracting binned ERA5 vs MIMIC Total Column Water for $(year(dtii)) $(Dates.monthname(dtii)) ..."
+
         fol = datadir("eravmimic/$(yr2str(dtii))")
         fnc = joinpath(fol,"eravmimic-$(ereg["fol"])-$(yrmo2str(dtii)).nc")
         ds  = NCDataset(fnc); evm += ds["bin_frq"][:]; close(ds)
@@ -75,6 +77,11 @@ function eravmimic(
     etmp = zeros(nhr); mtmp = zeros(nhr)
 
     for ilat = 1 : nlat, ilon = 1 : nlon; ibeg = 1; iend = 0; ; mlat = nlat + 1 - ilat
+
+        @info """$(Dates.now()) - Extracting all precipitable water info for Gridpoint
+          $(BOLD("Longitude:")) $(elon[ilon])
+          $(BOLD("Latitude:")) $(elat[ilat])
+        """
 
         for dtii in datevec
 
