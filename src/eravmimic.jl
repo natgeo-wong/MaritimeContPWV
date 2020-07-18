@@ -60,8 +60,8 @@ function eravmimic(
 
     for dtii in datevec
 
-        fol = datadir("eravmimic/$(yr2str(date))")
-        fnc = joinpath(fol,"eravmimic-$(ereg["fol"])-$(yrmo2str(date)).nc")
+        fol = datadir("eravmimic/$(yr2str(dtii))")
+        fnc = joinpath(fol,"eravmimic-$(ereg["fol"])-$(yrmo2str(dtii)).nc")
         ds  = NCDataset(fnc); evm += ds["bin_frq"][:]; close(ds)
 
     end
