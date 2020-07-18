@@ -1,9 +1,7 @@
 using ClimateERA
 using ClimateSatellite
-using Crayons.Box
 using Dates
 using GeoRegions
-using JLD2
 using Logging
 using NCDatasets
 using StatsBase
@@ -79,25 +77,20 @@ function eravmimic(
 
     for ilat = 1 : nlat, ilon = 1 : nlon; ibeg = 1; iend = 0; ; mlat = nlat + 1 - ilat
 
-        @info """$(Dates.now()) - Extracting all precipitable water info for Gridpoint
-          $(BOLD("Longitude:")) $(elon[ilon])
-          $(BOLD("Latitude:")) $(elat[ilat])
-        """
-
         for dtii in datevec
 
             tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii);
             mds,mvar = clisatrawread("mtpw2m","tpw",dtii,regID,path=sroot);
 
             iend += 24 * daysinmonth(dtii)
-            mtmp[ibeg:iend] = mvar[ilon,mlat,:]
-            etmp[ibeg:iend] = tvar[ilon,ilat,:]
+            mtmp[ibeg:iend] .= mvar[ilon,mlat,:]
+            etmp[ibeg:iend] .= tvar[ilon,ilat,:]
 
             close(tds); close(mds); ibeg += 24 * daysinmonth(dtii)
 
         end
 
-        evmcorr[ilon,ilat] = cor(mtmp,etmp)
+        evmcorr[ilon,ilat] .= cor(mtmp,etmp)
 
     end
 
