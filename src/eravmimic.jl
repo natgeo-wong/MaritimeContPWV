@@ -1,5 +1,6 @@
 using ClimateERA
 using ClimateSatellite
+using Crayons.Box
 using Dates
 using GeoRegions
 using JLD2
@@ -72,7 +73,7 @@ function eravmimic(
 
     @info "$(Dates.now()) - Preallocating data arrays to find the correlation gridpoint by gridpoint between ERA5 and MIMIC data ..."
 
-    evmcorr = zeros(Int32,nlon,nlat);
+    evmcorr = zeros(nlon,nlat);
     nhr  = length(DateTime(etime["Begin"],1):Hour(1):DateTime(etime["End"]+1,1)) - 1
     etmp = zeros(nhr); mtmp = zeros(nhr)
 
@@ -89,8 +90,8 @@ function eravmimic(
             mds,mvar = clisatrawread("mtpw2m","tpw",dtii,regID,path=sroot);
 
             iend += 24 * daysinmonth(dtii)
-            mtmp[ibeg:iend,1] = mvar[ilon,mlat,:]
-            etmp[ibeg:iend,2] = tvar[ilon,ilat,:]
+            mtmp[ibeg:iend] = mvar[ilon,mlat,:]
+            etmp[ibeg:iend] = tvar[ilon,ilat,:]
 
             close(tds); close(mds); ibeg += 24 * daysinmonth(dtii)
 
@@ -233,7 +234,7 @@ function eravmimicsave(
         "long_name" => "latitude",
     ))
 
-    nccorr = defVar(ds,"rho",Int32,("longitude","latitude"),attrib = Dict(
+    nccorr = defVar(ds,"rho",Float64,("longitude","latitude"),attrib = Dict(
         "long_name" => "pearson_correlation",
         "full_name" => "Pearson Correlation Coefficient",
     ))
