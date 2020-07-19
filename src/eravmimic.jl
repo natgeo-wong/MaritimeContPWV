@@ -69,9 +69,25 @@ function eravmimic(
 
     eravmimicsave(evm,pwv,ereg)
 
+end
+
+function eramimicrho(
+    init::AbstractDict, eroot::AbstractDict, sroot::AbstractString;
+    regID::AbstractString="GLB",
+    timeID::Union{Integer,Vector}=0,
+)
+
     @info "$(Dates.now()) - Preallocating data arrays to find the correlation gridpoint by gridpoint between ERA5 and MIMIC data ..."
 
-    evmcorr = zeros(nlon,nlat);
+    global_logger(ConsoleLogger(stdout,Logging.Warn))
+    emod,epar,ereg,etime = erainitialize(
+        init,
+        modID="msfc",parID="tcwv",regID=regID,timeID=timeID
+    );
+    global_logger(ConsoleLogger(stdout,Logging.Info))
+    datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
+
+    nlon,nlat = ereg["size"]; evmcorr = zeros(nlon,nlat);
     nhr  = length(DateTime(etime["Begin"],1):Hour(1):DateTime(etime["End"]+1,1)) - 1
     etmp = zeros(nhr); mtmp = zeros(nhr)
 
@@ -79,7 +95,7 @@ function eravmimic(
 
         for dtii in datevec
 
-            tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii);
+            tds,tvar = erarawread(emod,epar,ereg,eroot,dtii);
             mds,mvar = clisatrawread("mtpw2m","tpw",dtii,regID,path=sroot);
 
             iend += 24 * daysinmonth(dtii)
@@ -90,7 +106,7 @@ function eravmimic(
 
         end
 
-        evmcorr[ilon,ilat] .= cor(mtmp,etmp)
+        evmcorr[ilon,ilat] = cor(mtmp,etmp)
 
     end
 
@@ -200,7 +216,7 @@ function eravmimicsave(
 end
 
 function eravmimicsave(
-    evmcorr::Array{<:Real,4}, ereg::Dict
+    evmcorr::Array{<:Real,2}, ereg::Dict
 )
 
     @info "$(Dates.now()) - Saving correlation for MIMIC vs ERA5 Total Column Water in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for all dates ..."
