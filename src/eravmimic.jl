@@ -107,8 +107,9 @@ function eramimicrho(
     end
 
     for ilat = 1 : nlat, ilon = 1 : nlon
-        mtmpii = @view mtmp[ilon,ilat,:]
-        etmpii = @view etmp[ilon,ilat,:]
+        mtmpii = @view mtmp[ilon,ilat,:]; ind = .!isnan.(mtmpii);
+        mtmpii = @view mtmp[ilon,ilat,ind]
+        etmpii = @view etmp[ilon,ilat,ind]
         evmcorr[ilon,ilat] = cor(mtmpii,etmpii)
     end
 
