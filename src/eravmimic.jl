@@ -89,25 +89,27 @@ function eramimicrho(
 
     nlon,nlat = ereg["size"]; evmcorr = zeros(nlon,nlat);
     nhr  = length(DateTime(etime["Begin"],1):Hour(1):DateTime(etime["End"]+1,1)) - 1
-    etmp = zeros(nhr); mtmp = zeros(nhr)
+    etmp = zeros(nlon,nlat,nhr); mtmp = zeros(nlon,nlat,nhr); ibeg = 1; iend = 0;
 
-    for ilat = 1 : nlat, ilon = 1 : nlon; ibeg = 1; iend = 0; ; mlat = nlat + 1 - ilat
+    for dtii in datevec
 
-        for dtii in datevec
+        @info "$(Dates.now()) - Extracting ERA5 and MIMIC Total Column Water for $(year(dtii)) $(Dates.monthname(dtii)) ..."
 
-            tds,tvar = erarawread(emod,epar,ereg,eroot,dtii);
-            mds,mvar = clisatrawread("mtpw2m","tpw",dtii,regID,path=sroot);
+        tds,tvar = erarawread(emod,epar,ereg,eroot,dtii);
+        mds,mvar = clisatrawread("mtpw2m","tpw",dtii,regID,path=sroot);
 
-            iend += 24 * daysinmonth(dtii)
-            mtmp[ibeg:iend] .= mvar[ilon,mlat,:]
-            etmp[ibeg:iend] .= tvar[ilon,ilat,:]
+        iend += 24 * daysinmonth(dtii)
+        mtmp[:,:,ibeg:iend] .= reverse(mvar[:],dims=2)
+        etmp[:,:,ibeg:iend] .= tvar[:]
 
-            close(tds); close(mds); ibeg += 24 * daysinmonth(dtii)
+        close(tds); close(mds); ibeg += 24 * daysinmonth(dtii)
 
-        end
+    end
 
-        evmcorr[ilon,ilat] = cor(mtmp,etmp)
-
+    for ilat = 1 : nlat, ilon = 1 : nlon
+        mtmpii = @view mtmp[ilon,ilat,:]
+        etmpii = @view etmp[ilon,ilat,:]
+        evmcorr[ilon,ilat] = cor(mtmpii,etmpii)
     end
 
     eravmimicsave(evmcorr,ereg)
