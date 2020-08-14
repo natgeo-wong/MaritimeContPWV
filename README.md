@@ -16,10 +16,10 @@ This repository contains the basic setup for the **MaritimeContPWV** project, us
 
 **Analysis/Comparison between Datasets**
 
-* [ ] Compare between different Precipitable Water datasets
-  - [ ] Compare ERA5 and ERA-Interim TCWV with TCW
+* [x] Compare between different Precipitable Water datasets
+  - [x] Compare ERA5 and ERA-Interim TCWV with TCW
   - [x] Over land, compare GNSS PWV with ERA5 and ERA-Interim TCWV
-  - [ ] Over ocean, compare ERA5 and ERA-Interim TCWV with MIMIC-TPW2m
+  - [x] Over ocean, compare ERA5 and ERA-Interim TCWV with MIMIC-TPW2m
 * [ ] Produce TPW-Precipitation curve over land, ocean and coastline
   - [x] General overview curve
   - [ ] Compare curve in different times of year / season
