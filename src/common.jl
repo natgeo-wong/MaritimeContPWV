@@ -14,3 +14,5 @@ end
 
 yr2str(date::TimeType)   = Dates.format(date,dateformat"yyyy")
 yrmo2str(date::TimeType) = Dates.format(date,dateformat"yyyymm")
+
+adderaparams() = eraparameteradd(srcdir("eraparams.txt"));
