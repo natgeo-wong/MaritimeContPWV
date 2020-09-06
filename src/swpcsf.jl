@@ -55,8 +55,8 @@ function swp(
     tmod,tpar,_,_ = erainitialize(init,modID="dpre",parID="t_air");
     global_logger(ConsoleLogger(stdout,Logging.Info))
 
-    Ts = Array{Float32,3}(undef,nlon,nlat)
-    ps = Array{Float32,3}(undef,nlon,nlat)
+    Ts = Array{Float32,2}(undef,nlon,nlat)
+    ps = Array{Float32,2}(undef,nlon,nlat)
     Ta = Array{Float32,3}(undef,nlon,nlat,np); Taii = Vector{Float32}(undef,np+2)
     esii = Vector{Float32}(undef,np+2)
 

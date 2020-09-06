@@ -4,4 +4,4 @@ using DrWatson
 include(srcdir("swp.jl"))
 
 init,eroot = erastartup(aID=2,dID=1,path="/n/holyscratch01/kuang_lab/");
-adderaparams(); swp(init,eroot,proot,regID="SEA")
+adderaparams(); swp(init,eroot,proot,regID="SEA"); csf(init,eroot,proot,regID="SEA")
