@@ -1,7 +1,9 @@
 using ClimateERA
 using Dates
-using Logging
 using Dierckx
+using GeoRegions
+using Logging
+using NCDatasets
 using NumericalIntegration
 
 include(srcdir("common.jl"))
@@ -29,8 +31,8 @@ end
 
 function tairread(emod::Dict, epar::Dict, ereg::Dict, eroot::Dict, date::TimeType)
 
-    fol = joinpath(eroot["era"],ereg["fol"],"t_air","raw",yr);
-    fnc = "$(emod["prefix"])-$(ereg["fol"])-t_air-sfc-$(yr2str(date))"
+    fol = joinpath(eroot["era"],ereg["fol"],"t_air","raw",yr2str(date));
+    fnc = "$(emod["prefix"])-$(ereg["fol"])-t_air-$(yrmo2str(date)).nc"
     eds = Dataset(joinpath(fol,fnc))
     if haskey(eds,epar["ID"]); ID = epar["ID"]; else; ID = epar["IDnc"]; end
     return eds,eds[ID]
@@ -45,12 +47,13 @@ function swp(
 
     emod,epar,ereg,etime = erainitialize(
         init;
-        modID="csfc",parID="swp",regID=regID,
+        modID="csfc",parID="swp",regID=regID,timeID=timeID,
         gres=gres
     )
 
     ehr = hrindy(emod); nlon,nlat = ereg["size"]
-    p = ClimateERA.erapressureload()*100; np = length(p); p = vcat(0,p,0)
+    p = ClimateERA.erapressureload()*100; np = length(p)
+    p = convert.(Float32,vcat(0,p,0))
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
 
     global_logger(ConsoleLogger(stdout,Logging.Warn))
@@ -66,10 +69,10 @@ function swp(
 
     for dtii in datevec
 
-        @info "$(Dates.now()) - Preallocating arrays ..."
+        @info "$(Dates.now()) - Preallocating arrays for $(uppercase(emod["dataset"])) $(epar["name"]) data in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(dtii)) $(Dates.monthname(dtii)) ..."
         nhr = ehr * daysinmonth(dtii); swp = zeros(nlon,nlat,nhr);
 
-        @info "$(Dates.now()) - Calculating Saturated Vapour Path data for $(dtii) ..."
+        @info "$(Dates.now()) - Calculating $(uppercase(emod["dataset"])) $(epar["name"]) data in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(dtii)) $(Dates.monthname(dtii)) ..."
         for it = 1 : nhr
 
             sds,svar = erarawread(smod,spar,ereg,eroot,dtii);
@@ -83,14 +86,13 @@ function swp(
 
                 for ip = 1 : np; Taii[ip+1] = Ta[ilon,ilat,ip] end
                 Taii[end] = Ts[ilon,ilat]; p[end] = ps[ilon,ilat];
-                esii[2:end] .= t2esat(Taii[2:end])
+                esii[2:end] .= t2esat.(Taii[2:end])
                 swp[ilon,ilat,it] = calcswp(esii,Taii,p,ps[ilon,ilat]);
 
             end
 
         end
 
-        @info "$(Dates.now()) - Saving Saturated Vapour Path data for $(dtii) ..."
         erarawsave(swp,emod,epar,ereg,dtii,sroot)
 
     end
@@ -107,7 +109,7 @@ function csf(
 
     emod,epar,ereg,etime = erainitialize(
         init;
-        modID="csfc",parID="csf",regID=regID,
+        modID="csfc",parID="csf",regID=regID,timeID=timeID,
         gres=gres
     )
 
