@@ -24,7 +24,7 @@ function calcswp(
 
     esat[2:end] .= (@view t[2:end]) .* (@view esat[2:end]) ./ (@view p[2:end])
     svec = 2.925586e-2 * cumul_integrate(p,esat)
-    if ps < p[end-1]; p[end] = 101235; end
+    if ps <= p[end-1]; p[end] = 101235; end
     spl = Spline1D(p,svec,k=1); return spl(ps)
 
 end
@@ -126,15 +126,10 @@ function csf(
 
     for dtii in datevec
 
-        @info "$(Dates.now()) - Calculating Column Saturation Fraction data for $(dtii) ..."
-        tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii);
-        sds,svar = erarawread(smod,spar,ereg,eroot,dtii);
-        tcw = tvar[:,:,it]*1; close(tds);
-        swp = svar[:,:,it]*1; close(sds);
-        csf = tcw ./ swp
-
-        @info "$(Dates.now()) - Saving Column Saturation Fraction data for $(dtii) ..."
-        erarawsave(csf,emod,epar,ereg,dtii,sroot)
+        @info "$(Dates.now()) - Calculating $(uppercase(emod["dataset"])) $(epar["name"]) data in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(dtii)) $(Dates.monthname(dtii)) ..."
+        tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii); tcw = tvar[:]*1; close(tds)
+        sds,svar = erarawread(smod,spar,ereg,eroot,dtii); swp = svar[:]*1; close(sds);
+        csf = tcw ./ swp; erarawsave(csf,emod,epar,ereg,dtii,sroot)
 
     end
 
