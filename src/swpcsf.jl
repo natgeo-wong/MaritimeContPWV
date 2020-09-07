@@ -22,9 +22,9 @@ function calcswp(
     esat::Vector{<:Real}, t::Vector{<:Real}, p::Vector{<:Real}, ps::Real
 )
 
-    esat[2:end] .= t[2:end] .* esat[2:end] ./ p[2:end]
+    esat[2:end] .= (@view t[2:end]) .* (@view esat[2:end]) ./ (@view p[2:end])
     svec = 2.925586e-2 * cumul_integrate(p,esat)
-    if ps < p[end-1]; p = vcat(p[1:(end-1)],1012.35); end
+    if ps < p[end-1]; p[end] = 101235; end
     spl = Spline1D(p,svec,k=1); return spl(ps)
 
 end
@@ -80,7 +80,11 @@ function swp(
             tds,tvar = tairread(tmod,tpar,ereg,eroot,dtii);
             Ts .= svar[:,:,it]*1;   close(sds);
             ps .= pvar[:,:,it]*1;   close(pds);
-            Ta .= tvar[:,:,:,it]*1; close(tds);
+
+            for ip = 1 : np; pre = Int16(p[ip+1]/100);
+                tpar["level"] = pre; tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii);
+                Ta[:,:,ip] .= tvar[:,:,it]*1; close(tds);
+            end
 
             for ilat = 1 : nlat, ilon = 1 : nlon
 
