@@ -1,7 +1,9 @@
 using DrWatson
-@quickactivate "PiPWV"
+@quickactivate "MaritimeContPWV"
 
-include(srcdir("swp.jl"))
+include(srcdir("swpcsf.jl"))
 
 init,eroot = erastartup(aID=2,dID=1,path="/n/holyscratch01/kuang_lab/");
-adderaparams(); swp(init,eroot,proot,regID="SEA"); csf(init,eroot,proot,regID="SEA")
+adderaparams();
+swp(init,eroot,eroot,regID="SEA");
+csf(init,eroot,eroot,regID="SEA")
