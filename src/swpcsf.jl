@@ -77,7 +77,6 @@ function swp(
 
             sds,svar = erarawread(smod,spar,ereg,eroot,dtii);
             pds,pvar = erarawread(pmod,ppar,ereg,eroot,dtii);
-            tds,tvar = tairread(tmod,tpar,ereg,eroot,dtii);
             Ts .= svar[:,:,it]*1;   close(sds);
             ps .= pvar[:,:,it]*1;   close(pds);
 
