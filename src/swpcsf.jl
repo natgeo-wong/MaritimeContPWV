@@ -22,8 +22,8 @@ function calcswp(
     esat::Vector{<:Real}, t::Vector{<:Real}, p::Vector{<:Real}, ps::Real
 )
 
-    esat[2:end] .= (@view t[2:end]) .* (@view esat[2:end]) ./ (@view p[2:end])
-    svec = 2.925586e-2 * cumul_integrate(p,esat)
+    esat[2:end] .= (0.62198 * (@view esat[2:end])) ./ (@view p[2:end])
+    svec = 0.1019368 * cumul_integrate(p,esat)
     if ps <= p[end-1]; p[end] = 101235; end
     spl = Spline1D(p,svec,k=1); return spl(ps)
 
@@ -65,7 +65,7 @@ function swp(
     Ts = Array{Float32,2}(undef,nlon,nlat)
     ps = Array{Float32,2}(undef,nlon,nlat)
     Ta = Array{Float32,3}(undef,nlon,nlat,np); Taii = Vector{Float32}(undef,np+2)
-    esii = Vector{Float32}(undef,np+2)
+    esii = zeros(np+2)
 
     for dtii in datevec
 
@@ -95,7 +95,7 @@ function swp(
             end
 
         end
-
+        
         erarawsave(swp,emod,epar,ereg,dtii,sroot)
 
     end
