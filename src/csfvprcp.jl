@@ -24,8 +24,8 @@ end
 
 function csfVprcp_gpm(
     init::AbstractDict, eroot::AbstractDict, sroot::AbstractString;
-    regID::AbstractString="GLB",
-    timeID::Union{Integer,Vector}=0
+    regID::AbstractString="GLB", timeID::Union{Integer,Vector}=0,
+    nbins::Integer=100
 )
 
     global_logger(ConsoleLogger(stdout,Logging.Warn))
@@ -40,7 +40,7 @@ function csfVprcp_gpm(
 
     @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against column saturation fraction ..."
 
-    tvec = collect(0:100)/100; nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
+    tvec = collect(0:nbins)/nbins; nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
     pmat = Array{Float32,3}(undef,nlon,nlat,nvec)
     pfrq = Array{Int64,3}(undef,nlon,nlat,nvec)
 
@@ -82,8 +82,8 @@ end
 
 function csfVprcp_era(
     init::AbstractDict, eroot::AbstractDict;
-    regID::AbstractString="GLB",
-    timeID::Union{Integer,Vector}=0
+    regID::AbstractString="GLB", timeID::Union{Integer,Vector}=0,
+    nbins::Integer=100
 )
 
     global_logger(ConsoleLogger(stdout,Logging.Warn))
@@ -99,7 +99,7 @@ function csfVprcp_era(
 
     @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against column saturation fraction ..."
 
-    tvec = collect(0:100)/100; nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
+    tvec = collect(0:nbins)/nbins; nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
     pmat = Array{Float32,3}(undef,nlon,nlat,nvec)
     pfrq = Array{Int64,3}(undef,nlon,nlat,nvec)
 
