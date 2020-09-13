@@ -21,19 +21,24 @@ function plotfreqhist(
     freqlnd = dropdims(mean(freqall .* lsmlnd,dims=(1,2)),dims=(1,2));
     freqall = dropdims(mean(freqall,dims=(1,2)),dims=(1,2));
 
-    pplt.close(); f,axs = pplt.subplots(nrows=1,aspect=2,axwidth=4);
+    pplt.close(); f,axs = pplt.subplots(nrows=2,aspect=2,axwidth=4);
 
     axs[1].plot(pwv,freqall ./ maximum(freqall),lw=1,label="All",legend="ul",c="k")
     axs[1].plot(pwv,freqsea ./ maximum(freqsea),lw=1,label="Sea",legend="ul",c="b")
     axs[1].plot(pwv,freqlnd ./ maximum(freqlnd),lw=1,label="Land",legend="ul",c="g")
 
-    # axs[1].plot(pwv,freqall,lw=1,label="All",legend="ul",c="k")
-    # axs[1].plot(pwv,freqsea,lw=1,label="Sea",legend="ul",c="b")
-    # axs[1].plot(pwv,freqlnd,lw=1,label="Land",legend="ul",c="g")
+    axs[2].plot(pwv,freqall,lw=1,label="All",legend="ul",c="k")
+    axs[2].plot(pwv,freqsea,lw=1,label="Sea",legend="ul",c="b")
+    axs[2].plot(pwv,freqlnd,lw=1,label="Land",legend="ul",c="g")
 
     axs[1].format(
         xlim=(0,80),xlabel="Precipitable Water / mm",
         ylim=(0,1),ylabel="Normalized Frequency",
+    )
+
+    axs[2].format(
+        xlim=(0,80),xlabel="Precipitable Water / mm",
+        ylabel="Frequency",
     )
 
     f.savefig(plotsdir("tcwfreq-SEAx0.25.png"),transparent=false,dpi=200)
