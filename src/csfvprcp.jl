@@ -154,7 +154,7 @@ function csfVprcpsave(
     ))
 
     nctcwv = defVar(ds,"csf",Float32,("csf",),attrib = Dict(
-        "long_name" => "column_saturation_fraction",
+        "long_name" => "fraction_column_saturation",
         "full_name" => "Column Saturation Fraction",
         "units"     => "kg m^{-2}"
     ))
