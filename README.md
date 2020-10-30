@@ -30,18 +30,27 @@ To improve representation of the Maritime Continent in our models, we first need
 
 As a way to validate the MIMIC-TPW2m and ERA5 datasets, I compared both datasets with GNSS-derived values of precipitable water. We are able to do this because GNSS data retrieval, unlike microwave satellite data, is independent from the reflectivity of the surface.
 
-## 1. Datasets Used
+## 1. Validating ERA5 total column water data
 
-### A. Reanalysis Data
+### A. Datasets Used
 
-We used the following [ERA5](https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3803) reanalysis data from the Climate Data Store:
-* Total Column Water, Column Water Vapour
-* Land-Sea Mask
-* Relative Humidity (by pressure level)
+For this part, we used the following datasets:
+* **[ERA5](https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3803)** hourly reanalysis data for total column water at 0.25º spatial resolution
+* **[ERA-Interim](https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3803)** 6-hourly reanalysis data for total column water at 0.75º spatial resolution
+* **[MIMIC-TPW2](http://tropic.ssec.wisc.edu/real-time/mtpw2)** data which consists of hourly satellite observational data at 0.25º spatial resolution
+* **GNSS** 5/10-min averaged zenith wet delay datasets derived from the SuGAr station in Sumatra (see figure below for reference, red dots are GPS stations)
+   * **Π** datasets calculated from the **[PiPWV](https://github.com/natgeo-wong/PiPWV)** project from hourly ERA5 and 6-hourly ERA-Interim data at 1º spatial resolution
 
-### B. Observational Data
+![Domains](figures/gpsnetwork.png)
 
-We used **[GPM IMERG](https://gpm.nasa.gov/data/directory)** precipitation data from the PMM website, **[MIMIC-TPW2m](http://tropic.ssec.wisc.edu/real-time/mtpw2m)** data from the CIMSS website, and **GNSS** precipitable water datasets derived from the SuGAr station in Sumatra.
+The MIMIC-TPW2 and GNSS datasets serve as contrasting but complementary observational datasets used to validate the ERA5 and ERA-Interim reanalysis datasets, which assimilate observations but at their roots are still outputs from model-runs.  MIMIC-TPW2 observations cover both land and ocean, however it has been noted on their website that over land the average error is likely larger than over ocean.  GNSS however, can return accurate point-measurements (given an accurate value of Π, see [here]() for more information) over land and thus complements MIMIC-TPW2's observations over the ocean.
+
+### B. Converting GNSS Zenith Wet Delay (ZWD) to Precipitable Water
+
+A more in-depth explanation of how we can convert GNSS ZWD to Precipitable Water can be found in the **[PiPWV](https://github.com/natgeo-wong/PiPWV)** repository.  Basically, ZWD can be converted to PWV via the "constant" Π, as follows:
+
+![Domains](figures/piequation.png)
+
 
 ## Installation
 
