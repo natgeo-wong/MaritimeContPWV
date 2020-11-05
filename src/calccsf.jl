@@ -27,7 +27,7 @@ function calccsf(
 
     r = cumul_integrate(pre,rhum) ./ cumul_integrate(pre,pdummy)
     r[1] = 0
-    if psfc < 100000; pre[end] = 101235 end
+    if psfc <= 100000; pre[end] = 101235 end
     spl = Spline1D(pre,r,k=1); return spl(psfc)
 
 end
