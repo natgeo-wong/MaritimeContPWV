@@ -21,11 +21,13 @@ end
 function calccsf(
     rhum::AbstractVector{<:Real},
     pre::AbstractVector{<:Real},
-    psfc::Real
+    psfc::Real,
+    pdummy::AbstractVector{<:Real}
 )
 
-    r = cumul_integrate(pre,rhum) ./ cumul_integrate(pre); r[1] = 0
-    if psfc < 1000; pre[end] = 101235 end
+    r = cumul_integrate(pre,rhum) ./ cumul_integrate(pre,pdummy)
+    r[1] = 0
+    if psfc < 100000; pre[end] = 101235 end
     spl = Spline1D(pre,r,k=1); return spl(psfc)
 
 end
@@ -58,6 +60,7 @@ function csf(
     ps = Array{Float32,2}(undef,nlon,nlat)
     Ts = Array{Float32,2}(undef,nlon,nlat)
     Td = Array{Float32,2}(undef,nlon,nlat)
+    pd = ones(length(p))
 
     rhii = Vector{Float32}(undef,np+2)
     rhii[1] = 0
@@ -67,11 +70,11 @@ function csf(
         @info "$(Dates.now()) - Preallocating arrays for $(uppercase(emod["dataset"])) $(epar["name"]) data in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(dtii)) $(Dates.monthname(dtii)) ..."
         nhr = ehr * daysinmonth(dtii); csf = zeros(nlon,nlat,nhr);
 
-        @info "$(Dates.now()) - Calculating $(uppercase(emod["dataset"])) $(epar["name"]) data in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(dtii)) $(Dates.monthname(dtii)) ..."
-
         pds,pvar = erarawread(pmod,ppar,ereg,eroot,dtii);
         tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii);
         dds,dvar = erarawread(dmod,dpar,ereg,eroot,dtii);
+
+        @info "$(Dates.now()) - Calculating $(uppercase(emod["dataset"])) $(epar["name"]) data in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(dtii)) $(Dates.monthname(dtii)) ..."
 
         for it = 1 : nhr
 
@@ -89,13 +92,14 @@ function csf(
                 for ip = 1 : np; rhii[ip+1] = rh[ilon,ilat,ip] end
                 p[end] = ps[ilon,ilat]
                 rhii[end] = t2esat(Td[ilon,ilat]) / t2esat(Ts[ilon,ilat])
-                csf[ilon,ilat,it] = calccsf(rhii,p,ps[ilon,ilat])
+                csf[ilon,ilat,it] = calccsf(rhii,p,ps[ilon,ilat],pd)
 
             end
 
         end
 
         close(pds); close(tds); close(dds);
+        erarawsave(csf,emod,epar,ereg,dtii,sroot)
 
     end
 
