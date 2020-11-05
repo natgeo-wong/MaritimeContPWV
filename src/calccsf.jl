@@ -52,9 +52,14 @@ function csf(
     global_logger(ConsoleLogger(stdout,Logging.Info))
 
     ehr = hrindy(emod); nlon,nlat = ereg["size"]
-    p = ClimateERA.erapressureload(); p = p[p.>=10]*100; np = length(p) + 1
+    p = ClimateERA.erapressureload(); p = p[p.>=10]*100; np = length(p)
     p = convert.(Float32,vcat(0,p,0))
-    rh = Array{Float32,3}(undef,nlon,nlat,np); rhii = Vector{Float32}(undef,np+2)
+    rh = Array{Float32,3}(undef,nlon,nlat,np)
+    ps = Array{Float32,2}(undef,nlon,nlat)
+    Ts = Array{Float32,2}(undef,nlon,nlat)
+    Td = Array{Float32,2}(undef,nlon,nlat)
+
+    rhii = Vector{Float32}(undef,np+2)
     rhii[1] = 0
 
     for dtii in datevec
@@ -74,7 +79,7 @@ function csf(
             Ts .= tvar[:,:,it]*1
             Td .= dvar[:,:,it]*1
 
-            for ip = 1 : np; pre = Int16(p[ip]/100);
+            for ip = 1 : np; pre = Int16(p[ip+1]/100);
                 rpar["level"] = pre; rds,rvar = erarawread(rmod,rpar,ereg,eroot,dtii);
                 rh[:,:,ip] .= rvar[:,:,it]*1; close(rds);
             end
@@ -82,9 +87,9 @@ function csf(
             for ilat = 1 : nlat, ilon = 1 : nlon
 
                 for ip = 1 : np; rhii[ip+1] = rh[ilon,ilat,ip] end
-                p[end] .= ps[:,:,it]
-                rhii[end] .= t2esat(Td[ilon,ilat]) / t2esat(Ts[ilon,ilat])
-                csf[ilon,ilat,it] = calccsf(rhii,p,ps[:,:,it])
+                p[end] = ps[ilon,ilat]
+                rhii[end] = t2esat(Td[ilon,ilat]) / t2esat(Ts[ilon,ilat])
+                csf[ilon,ilat,it] = calccsf(rhii,p,ps[ilon,ilat])
 
             end
 
