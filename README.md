@@ -80,7 +80,7 @@ A comparison with MIMIC-TPW2m, however, shows that although indeed the relations
 
 For this part, we used the following datasets:
 * **ERA5** hourly reanalysis data for **total column water** and **precipitation** at 0.25º spatial resolution
-* **GPM** 30-min precipitation rates at 0.1º spatial resolution
+* **GPM** 30-min **precipitation rates** at 0.1º spatial resolution
 
 Similar to in Section (1), we defined land and ocean points to be where the ERA5 land-sea mask is >0.5 and <=0.5 respectively.
 
