@@ -59,29 +59,30 @@ function plotPEcurvelandsea(
     axs[jj].plot(csf,prcpall,lw=1,label="All",legend="ul",c="k")
     axs[jj].plot(csf,prcpsea,lw=1,label="Sea",legend="ul",c="b")
     axs[jj].plot(csf,prcplnd,lw=1,label="Land",legend="ul",c="g")
-    # axs[jj].plot(10:0.5:90,prcpcst,lw=1,label="Coast",legend="ul",c="r")
 
     axs[jj].format(
         xlim=(0,1),xlabel="Precipitable Water / mm",
-        ylim=(1e-4,20),ylabel=L"Precipitation Rate / mm hr$^{-1}$",#yscale="log",
+        ylim=(1e-4,100),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
         title="Precipitation Data Source: $(uppercase(dID))",abc=true
     )
 
 end
 
-arr = [[0,1,1,0],[2,2,3,3]]
-pplt.close(); f,axs = pplt.subplots(arr,aspect=2,axwidth=3,sharex=3,sharey=3);
 
-plotPEcurvegeneral("gpm");
-plotPEcurvegeneral("era5");
-axs[1].format(
-    xlim=(0,1),
-    ylim=(1e-4,100),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
-    title="Summary",abc=true,
-    suptitle="P-E curve (2001-2018)"
-)
+pplt.close();
+# sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
+                            f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
 
-plotPEcurvelandsea("gpm",2,othr=0.5,lthr=0.5);
-plotPEcurvelandsea("era5",3,othr=0.5,lthr=0.5);
+# plotPEcurvegeneral("gpm");
+# plotPEcurvegeneral("era5");
+# axs[1].format(
+#     xlim=(0,1),
+#     ylim=(1e-4,100),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
+#     title="Summary",abc=true,
+#     suptitle="P-E curve (2001-2018)"
+# )
 
-f.savefig(plotsdir("PCcurve.png"),transparent=false,dpi=200)
+plotPEcurvelandsea("gpm",1,othr=0.5,lthr=0.5);
+plotPEcurvelandsea("era5",2,othr=0.5,lthr=0.5);
+
+f.savefig(plotsdir("PCcurve-2.png"),transparent=false,dpi=200)

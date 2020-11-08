@@ -47,7 +47,7 @@ axs[1].pcolormesh(
     0:100,0:100,freqall' .* 100^2,cmap="gnbu",
     #levels=0:0.1:1,extend="max"
     norm="segmented",extend="max",
-    levels=[0,0.01,0.1,1,10,20,50,90,100],
+    levels=[0,1,10,20,50,90,100],
 )
 axs[1].plot([0,100],[0,100],c="k",lw=0.2)
 axs[1].format(
@@ -61,7 +61,7 @@ axs[2].pcolormesh(
     0:100,0:100,freqlnd' .* 100^2,cmap="gnbu",
     #levels=0:0.1:1,extend="max"
     norm="segmented",extend="max",
-    levels=[0,0.01,0.1,1,10,20,50,90,100],
+    levels=[0,1,10,20,50,90,100],
 )
 axs[2].plot([0,100],[0,100],c="k",lw=0.2)
 axs[2].format(
@@ -75,7 +75,7 @@ c = axs[3].pcolormesh(
     0:100,0:100,freqsea' .* 100^2,cmap="gnbu",
     #levels=0:0.1:1,extend="max"
     norm="segmented",extend="max",
-    levels=[0,0.01,0.1,1,10,20,50,90,100],
+    levels=[0,1,10,20,50,90,100],
 )
 axs[3].plot([0,100],[0,100],c="k",lw=0.2)
 axs[3].format(

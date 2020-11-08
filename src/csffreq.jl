@@ -23,9 +23,9 @@ function csffreq(
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
 
     @info "$(Dates.now()) - Preallocating data arrays to find frequency ..."
-    csfvec = (1:nbins)/nbins
-    csfspt = zeros(Int32,nlon,nlat,nbins-1)
-    csfcum = zeros(Int32,nlon,nlat,nbins-1)
+    csfvec = (0:nbins)/nbins
+    csfspt = zeros(Int32,nlon,nlat,nbins)
+    csfcum = zeros(Int32,nlon,nlat,nbins)
 
     if !isdir(datadir("compiled/csffreq")); mkpath(datadir("compiled/csffreq")) end
 
