@@ -40,7 +40,7 @@ function csfVprcp_gpm(
 
     @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against column saturation fraction ..."
 
-    tvec = collect(0:nbins)/nbins; nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
+    tvec = collect(0:nbins); nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
     pmat = Array{Float32,3}(undef,nlon,nlat,nvec)
     pfrq = Array{Int64,3}(undef,nlon,nlat,nvec)
 
@@ -99,7 +99,7 @@ function csfVprcp_era(
 
     @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against column saturation fraction ..."
 
-    tvec = collect(0:nbins)/nbins; nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
+    tvec = collect(0:nbins); nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
     pmat = Array{Float32,3}(undef,nlon,nlat,nvec)
     pfrq = Array{Int64,3}(undef,nlon,nlat,nvec)
 
