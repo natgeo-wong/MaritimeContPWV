@@ -44,7 +44,7 @@ For this part, we used the following datasets:
 * **GNSS** 5/10-min averaged zenith wet delay datasets derived from the SuGAr station in Sumatra (see figure below for reference, red dots are GPS stations)
    * **Π** datasets calculated from the **[PiPWV](https://github.com/natgeo-wong/PiPWV)** project from hourly ERA5 and 6-hourly ERA-Interim data at 1º spatial resolution
 
-![Domains](figures/gpsnetwork.png)
+![gpsnetwork](figures/gpsnetwork.png)
 
 The MIMIC-TPW2 and GNSS datasets serve as contrasting but complementary observational datasets used to validate the ERA5 and ERA-Interim reanalysis datasets, which assimilate observations but at their roots are still outputs from model-runs.  MIMIC-TPW2 observations cover both land and ocean, however it has been noted on their website that over land the average error is likely larger than over ocean.  GNSS however, can return accurate point-measurements (given an accurate value of Π, see [here]() for more information) over land and thus complements MIMIC-TPW2's observations over the ocean.
 
@@ -54,7 +54,7 @@ We defined land and ocean points to be where the ERA5 land-sea mask is >0.5 and 
 
 A more in-depth explanation of how we can convert GNSS ZWD to Precipitable Water can be found in the **[PiPWV](https://github.com/natgeo-wong/PiPWV)** repository.  Basically, ZWD can be converted to PWV via the "constant" Π, as follows:
 
-![Domains](figures/piequation.png)
+![piequation](figures/piequation.png)
 
 In the **PiPWV** project, we have already calculated the values of Π at 1º spatial resolution, hourly for ERA5 data and 6-hourly for ERA-Interim. *(Note: In the near future, I intend to update my results for ERA5 after recalculating Π at native 0.25º resolution as opposed to use 1º interpolated resolution.)*
 
@@ -64,13 +64,13 @@ Because GNSS datasets were provided every 5/10 minutes, I averaged the data into
 
 #### ECMWF reanalysis vs GNSS observations
 
-![Domains](figures/eravgnss.png)
+![eravgnss](figures/eravgnss.png)
 
 We see that both ECMWF reanalysis datasets perform reasonably well over land compared to GNSS datasets, where we see that the precipitable water values between reanalysis and observational datasets generally have the highest density close to the `y=x` line.  We see that the peak for ERA5 however, is higher and sharper than for ERA-Interim, which is indicative of the fact that the error between reanalysis and observations is lower in ERA5 compared to ERA-Interim.
 
 #### ECMWF reanalysis vs MIMIC-TPW2m observations
 
-![Domains](figures/eravmimic.png)
+![eravmimic](figures/eravmimic.png)
 
 A comparison with MIMIC-TPW2m, however, shows that although indeed the relationship is close to the `y=x` line, there is a significant degree of scatter about this line compared to using GNSS data.  A comparison of the land and sea points shows that indeed, most of this variability comes from land-observation points.  We know that this scatter comes mostly from MIMIC-TPW2m observations due to the fact that a comparison between MIMIC-TPW2m and GNSS datasets yields similar results.
 
@@ -88,7 +88,21 @@ Similar to in Section (1), we defined land and ocean points to be where the ERA5
 
 We bin the ERA5 column water from 10 to 90 mm in steps of 0.5 mm.  For each bin, we calculate the average precipitation rate, to get a precipitation-column water curve similar to that found in Bretherton et al. (2004).  We do this for both GPM and ERA5 precipitation rates.
 
-![Domains](figures/PEcurve.png)
+![PEcurve](figures/PEcurve.png)
+
+However, it has been noted by Bretherton et al. (2004) that such curves vary depending on the average sea surface temperature, which in turn influences the average air temperature and therefore the saturation specific humidity.  When they rebinned precipitation rates against column saturation fraction, they found that the different curves in different ocean basins all collapsed very well into a single curve.  Therefore, in a similar manner we investigated the relationship between precipitation rate and column saturation fraction, to see if similar trends that were observed in our comparison between rainfall rate and total column water are applicable here.
+
+This is especially notable, because we also wish to differentiate between the relationship between precipitable water and rainfall rate over land and sea, in order to investigate the different mechanisms at play over vastly different surfaces.  As can be seen by the distribution of precipitable water, the atmospheric column over land tends to be drier than the ocean where absolute values of precipitable water are concerned.  However, it is unknown if this is due to differences in the temperature over land or sea.
+
+![tcwfreq](figures/tcwfreq-SEAx0.25.png)
+
+### B. Comparison between Rainfall Rates and Column Saturation Fraction
+
+We first investigate the distribution of column saturation fraction in the Maritime Continent over all spatial and temporal points.  We see that despite it being noted above that in terms of absolute precipitable water, land points were drier than the ocean, in terms of column saturation, the atmosphere over land is more saturated than over the ocean.
+
+![csffreq](figures/csffreq-SEAx0.25.png)
+
+
 
 ## Installation
 

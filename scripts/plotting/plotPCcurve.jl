@@ -52,17 +52,13 @@ function plotPEcurvelandsea(
     prcplnd = dropdims(sum(prcplnd,dims=(1,2)),dims=(1,2)) ./ freqlnd
     prcplnd[freqlnd.<fthr] .= NaN
 
-    freqcst = dropdims(sum(freqcst,dims=(1,2)),dims=(1,2)); freqcst[freqcst.<25] .= 0
-    prcpcst = dropdims(sum(prcpcst,dims=(1,2)),dims=(1,2)) ./ freqcst
-    prcpcst[freqcst.<fthr] .= NaN
-
     axs[jj].plot(csf,prcpall,lw=1,label="All",legend="ul",c="k")
     axs[jj].plot(csf,prcpsea,lw=1,label="Sea",legend="ul",c="b")
     axs[jj].plot(csf,prcplnd,lw=1,label="Land",legend="ul",c="g")
 
     axs[jj].format(
-        xlim=(0,1),xlabel="Precipitable Water / mm",
-        ylim=(1e-4,100),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
+        xlim=(0,120),xlabel="Column Saturation Fraction",
+        ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
         title="Precipitation Data Source: $(uppercase(dID))",abc=true
     )
 
@@ -70,19 +66,19 @@ end
 
 
 pplt.close();
-# sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
-                            f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
+sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
+                            # f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
 
-# plotPEcurvegeneral("gpm");
-# plotPEcurvegeneral("era5");
-# axs[1].format(
-#     xlim=(0,1),
-#     ylim=(1e-4,100),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
-#     title="Summary",abc=true,
-#     suptitle="P-E curve (2001-2018)"
-# )
+plotPEcurvegeneral("gpm");
+plotPEcurvegeneral("era5");
+axs[1].format(
+    xlim=(0,120),
+    ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
+    title="Summary",abc=true,
+    suptitle="P-C curve"
+)
 
-plotPEcurvelandsea("gpm",1,othr=0.5,lthr=0.5);
-plotPEcurvelandsea("era5",2,othr=0.5,lthr=0.5);
+plotPEcurvelandsea("gpm",2,othr=0.5,lthr=0.5);
+plotPEcurvelandsea("era5",3,othr=0.5,lthr=0.5);
 
-f.savefig(plotsdir("PCcurve-2.png"),transparent=false,dpi=200)
+f.savefig(plotsdir("PCcurve.png"),transparent=false,dpi=200)

@@ -23,17 +23,17 @@ function plotfreqhist(
 
     pplt.close(); f,axs = pplt.subplots(nrows=1,aspect=2,axwidth=4);
 
-    axs[1].plot(csf,freqall / sum(freqall) * nbins,lw=1,label="All",legend="lr",c="k")
-    axs[1].plot(csf,freqsea / sum(freqsea) * nbins,lw=1,label="Sea",legend="lr",c="b")
-    axs[1].plot(csf,freqlnd / sum(freqlnd) * nbins,lw=1,label="Land",legend="lr",c="g")
+    axs[1].plot(csf,freqall / sum(freqall) * 120,lw=1,label="All",legend="ul",c="k")
+    axs[1].plot(csf,freqsea / sum(freqsea) * 120,lw=1,label="Sea",legend="ul",c="b")
+    axs[1].plot(csf,freqlnd / sum(freqlnd) * 120,lw=1,label="Land",legend="ul",c="g")
 
-    # axs[2].plot(csf,freqall,lw=1,label="All",legend="lr",c="k")
-    # axs[2].plot(csf,freqsea,lw=1,label="Sea",legend="lr",c="b")
-    # axs[2].plot(csf,freqlnd,lw=1,label="Land",legend="lr",c="g")
+    # axs[1].plot(csf,freqall,lw=1,label="All",legend="lr",c="k")
+    # axs[1].plot(csf,freqsea,lw=1,label="Sea",legend="lr",c="b")
+    # axs[1].plot(csf,freqlnd,lw=1,label="Land",legend="lr",c="g")
 
     axs[1].format(
-        xlim=(0,1),xlabel="Column Saturation Fraction",
-        ylim=(0,5),ylabel="Density",
+        xlim=(0,120),xlabel="Column Saturation Fraction",
+        ylim=(0,4),ylabel="Density"
     )
 
     # axs[2].format(
