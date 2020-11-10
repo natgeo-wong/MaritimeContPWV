@@ -6,7 +6,7 @@ using PyCall
 using LaTeXStrings
 pplt = pyimport("proplot");
 
-function plotPEcurvegeneral(dID::AbstractString; fthr::Integer=25)
+function plotPEcurvegeneral(dID::AbstractString; density::Integer=25)
 
     @load "$(datadir("compiled/csfVprcp/$(dID).jld2"))" prcp freq csf
     if uppercase(dID) == "ERA5"
@@ -24,7 +24,7 @@ end
 
 function plotPEcurvelandsea(
       dID::AbstractString, jj::Integer;
-      lthr::Real=0.75, othr::Real=0.25, fthr::Integer=25
+      coast::Real=0.5, density::Real=0.05
 )
 
     @load "$(datadir("compiled/csfVprcp/$(dID).jld2"))" prcp freq csf
@@ -33,31 +33,71 @@ function plotPEcurvelandsea(
     else; prcp = prcp * 3600 # Units is in mm s-1
     end
 
+    prcps = prcp ./ freq
+
+    nbins = length(csf)
     freqall = dropdims(sum(freq,dims=(1,2)),dims=(1,2))
     prcpall = dropdims(sum(prcp,dims=(1,2)),dims=(1,2)) ./ freqall
-    prcpall[freqall.<fthr] .= NaN
+    freqall = freqall / sum(freqall) * nbins
+    prcpall[freqall.<density] .= NaN
 
     mds = Dataset(datadir("era5-SEAx0.25-lsm.nc")); lsm = mds["lsm"][:]*1; close(mds)
-    lsmsea = lsm .< othr; lsmlnd = lsm .> lthr; lsmcst = (lsm .<= lthr) .& (lsm .>= othr)
+    lsmsea = lsm .< coast; lsmlnd = lsm .> coast
 
     freqsea = freq .* lsmsea; prcpsea = prcp .* lsmsea
     freqlnd = freq .* lsmlnd; prcplnd = prcp .* lsmlnd
-    freqcst = freq .* lsmcst; prcpcst = prcp .* lsmcst
+
+    lsmsea = dropdims(lsmsea,dims=3)
+    lsmlnd = dropdims(lsmlnd,dims=3)
+
+    prcpsea25 = zeros(nbins); prcpsea50 = zeros(nbins); prcpsea75 = zeros(nbins)
+    prcplnd25 = zeros(nbins); prcplnd50 = zeros(nbins); prcplnd75 = zeros(nbins)
+
+    for icsf = 1 : nbins
+
+        prcpseaii = prcps[:,:,icsf]; prcpseaii = prcpseaii[lsmsea]
+        prcpseaii[isnan.(prcpseaii)] .= 0
+
+        if !isempty(prcpseaii)
+            prcpsea25[icsf] = percentile(prcpseaii,5)
+            prcpsea75[icsf] = percentile(prcpseaii,95)
+        end
+
+        prcplndii = prcps[:,:,icsf]; prcplndii = prcplndii[lsmlnd]
+        prcplndii[isnan.(prcplndii)] .= 0
+
+        if !isempty(prcplndii)
+            prcplnd25[icsf] = percentile(prcplndii,5)
+            prcplnd75[icsf] = percentile(prcplndii,95)
+        end
+
+    end
 
     freqsea = dropdims(sum(freqsea,dims=(1,2)),dims=(1,2))
     prcpsea = dropdims(sum(prcpsea,dims=(1,2)),dims=(1,2)) ./ freqsea
-    prcpsea[freqsea.<fthr] .= NaN
+    freqsea = freqsea / sum(freqsea) * nbins
+    prcpsea[freqsea.<density] .= NaN
+    prcpsea25[freqsea.<density] .= NaN
+    prcpsea75[freqsea.<density] .= NaN
 
     freqlnd = dropdims(sum(freqlnd,dims=(1,2)),dims=(1,2))
     prcplnd = dropdims(sum(prcplnd,dims=(1,2)),dims=(1,2)) ./ freqlnd
-    prcplnd[freqlnd.<fthr] .= NaN
+    freqlnd = freqlnd / sum(freqlnd) * nbins
+    prcplnd[freqlnd.<density] .= NaN
+    prcplnd25[freqlnd.<density] .= NaN
+    prcplnd75[freqlnd.<density] .= NaN
+
 
     axs[jj].plot(csf,prcpall,lw=1,label="All",legend="ul",c="k")
+
+    axs[jj].plot(csf,prcpsea,fadedata=[prcpsea25,prcpsea75],lw=1,c="b")
+    axs[jj].plot(csf,prcplnd,fadedata=[prcplnd25,prcplnd75],lw=1,c="g")
+
     axs[jj].plot(csf,prcpsea,lw=1,label="Sea",legend="ul",c="b")
     axs[jj].plot(csf,prcplnd,lw=1,label="Land",legend="ul",c="g")
 
     axs[jj].format(
-        xlim=(0,120),xlabel="Column Saturation Fraction",
+        xlim=(0,nbins),xlabel="Column Saturation Fraction",
         ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
         title="Precipitation Data Source: $(uppercase(dID))",abc=true
     )
@@ -78,7 +118,7 @@ axs[1].format(
     suptitle="P-C curve"
 )
 
-plotPEcurvelandsea("gpm",2,othr=0.5,lthr=0.5);
-plotPEcurvelandsea("era5",3,othr=0.5,lthr=0.5);
+plotPEcurvelandsea("gpm",2,density=0.05);
+plotPEcurvelandsea("era5",3,density=0.05);
 
 f.savefig(plotsdir("PCcurve.png"),transparent=false,dpi=200)

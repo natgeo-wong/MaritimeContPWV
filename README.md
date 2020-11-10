@@ -98,11 +98,23 @@ This is especially notable, because we also wish to differentiate between the re
 
 ### B. Comparison between Rainfall Rates and Column Saturation Fraction
 
-We first investigate the distribution of column saturation fraction in the Maritime Continent over all spatial and temporal points.  We see that despite it being noted above that in terms of absolute precipitable water, land points were drier than the ocean, in terms of column saturation, the atmosphere over land is more saturated than over the ocean.
+We first investigate the distribution of column saturation fraction in the Maritime Continent over all spatial and temporal points.  We see that despite it being noted above that in terms of absolute precipitable water, land points were drier than the ocean, in terms of column saturation, the atmosphere over land is more saturated than over the ocean.  This implies that the temperature of the atmospheric column is on average lower than that over the ocean, and therefore nears saturation despite having lower values of precipitable water.
 
 ![csffreq](figures/csffreq-SEAx0.25.png)
 
+For Column Saturation Fraction (CSF) values which, in the plot above, have a probability density of above 0.05 (i.e. 15-90%), we find the mean, as well as the 25th- and 75th-percentiles, of rainfall rate for Column Saturation Fraction, binned in 1% increments.
 
+![PCcurve](figures/PCcurve.png)
+
+*(Note: Solid lines represent mean, shaded parts represent 5th and 95th percentiles.)*
+
+We see that there is a noticeable difference in the relationship between precipitation rate and column-saturation fraction over land and sea.  This difference is seen when GPM IMERG precipitation is used, but is much less noticeable (except at lower CSF) in ERA5.  From GPM-IMERG, it can be seen that the relationship between CSF and rainfall rate is weaker on land compared to over the ocean, such that at high CSF, the rainfall rate is lower.  For mid-saturation levels of CSF (50-60%), we see that rainfall is slightly higher over land than on ocean.
+
+We also investigate the spatial distribution of average rainfall rate for four different values of CSF: 25%, 50%, 75% and 90%, as a ratio of the domain-averaged rainfall over all ocean grid-points.
+
+![CSFspatial](figures/csfspatial-ratio.png)
+
+It is immediately apparent that at 50-60% CSF, rainfall over the islands of the Maritime Continent is noticeably enhanced compared to the surrounding ocean.  However, at a CSF of 90%, rainfall over the islands is noticeable lower than the surrounding seas.  Lastly, we also see that rainfall over the ocean near the equator is noticeably lower than rainfall rates as one moves polewards towards the subtropics.  It remains to be seen if this is due to the presence of islands, as opposed to this being a latitude effect.
 
 ## Installation
 
