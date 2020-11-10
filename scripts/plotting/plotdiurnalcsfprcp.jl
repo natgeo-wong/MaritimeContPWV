@@ -4,9 +4,12 @@ using DrWatson
 using ClimateERA
 using ClimateSatellite
 using Dates
+using DelimitedFiles
 using GeoRegions
 using Logging
 using NCDatasets
+using Printf
+using Statistics
 
 using PyCall
 using LaTeXStrings
@@ -61,14 +64,21 @@ function plotcsfprcp(
     rlon::Vector{<:Real}, rlat::Vector{<:Real}, prcp::Array{<:Real,3}
 )
 
+    coord = readdlm(plotsdir("SEA.txt"),comments=true,comment_char='#')
+    x = coord[:,1]; y = coord[:,2];
+    mcsf = dropdims(mean(csf,dims=3),dims=3)
+
     for hr = 1 : 24
 
-        pplt.close(); proj = pplt.Proj("eqc");
-        f,axs = pplt.subplots(proj=proj,nrows=1,axwidth=5,aspect=2)
+        pplt.close(); f,axs = pplt.subplots(nrows=1,axwidth=5,aspect=15/7)
 
-        c = axs[1].contourf(elon,elat,csf[:,:,hr]',cmap="Blues",levels=0.25:0.05:0.75)
+        c = axs[1].contourf(
+            elon,elat,(csf[:,:,hr].-mcsf)',
+            cmap="Blues",levels=-5:5,extend="both"
+        )
+        axs[1].plot(x,y,c="k",lw=0.5)
         axs[1].contour(rlon,rlat,prcp[:,:,hr]',levels=[0,0.5],linewidth=0.5,color="r")
-        axs[1].format(lonlim=(90,165),latlim=(-15,20),coast=true)
+        axs[1].format(xlim=(90,165),ylim=(-15,20),coast=true,xlocator=90:15:165)
         axs[1].colorbar(c,loc="b",title="Column Relative Humidity")
 
         if !isdir(plotsdir("csfanim")); mkpath(plotsdir("csfanim")) end
