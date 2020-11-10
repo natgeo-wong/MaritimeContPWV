@@ -116,6 +116,12 @@ We also investigate the spatial distribution of average rainfall rate for four d
 
 It is immediately apparent that at 50-60% CSF, rainfall over the islands of the Maritime Continent is noticeably enhanced compared to the surrounding ocean.  However, at a CSF of 90%, rainfall over the islands is noticeable lower than the surrounding seas.  Lastly, we also see that rainfall over the ocean near the equator is noticeably lower than rainfall rates as one moves polewards towards the subtropics.  It remains to be seen if this is due to the presence of islands, as opposed to this being a latitude effect.
 
+## 3. Mean Climatology of Column Saturation Fraction in the Maritime Continent
+
+Text
+
+![CSFspatial](figures/csf.png)
+
 ## Installation
 
 To (locally) reproduce this project, do the following:

@@ -22,12 +22,12 @@ x = coord[:,1]; y = coord[:,2];
 
 pplt.close(); f,axs = pplt.subplots(nrows=2,axwidth=5,aspect=15/7)
 
-c = axs[1].contourf(lon,lat,avg',cmap="Blue",levels=0:10:100)
+c = axs[1].contourf(lon,lat,avg',cmap="Blues",levels=0:10:100)
 axs[1].plot(x,y,c="k",lw=0.5)
 axs[1].format(rtitle="Average",suptitle="Column Saturation Fraction / %")
 axs[1].colorbar(c,loc="r")
 
-c = axs[2].contourf(lon,lat,dhr',cmap="Blue",levels=0:10,extend="max")
+c = axs[2].contourf(lon,lat,dhr',cmap="Blues",levels=0:10)
 axs[2].plot(x,y,c="k",lw=0.5)
 axs[2].format(rtitle="Diurnal Variability")
 axs[2].colorbar(c,loc="r")
