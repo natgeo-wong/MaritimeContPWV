@@ -103,7 +103,25 @@ function plotcsfprcp(
 
     if !isdir(plotsdir("csfanim")); mkpath(plotsdir("csfanim")) end
     f.savefig(plotsdir(
-        "csfanim/csfprcp-range.png"),
+        "csfanim/csf-range.png"),
+        transparent=false,dpi=200
+    )
+
+    rprcp = dropdims(maximum(prcp,dims=3),dims=3) .- dropdims(minimum(prcp,dims=3),dims=3)
+
+    pplt.close(); f,axs = pplt.subplots(nrows=1,axwidth=5,aspect=15/7)
+
+    c = axs[1].contourf(
+        rlon,rlat,rprcp',
+        cmap="Blues",levels=0:10,extend="max"
+    )
+    axs[1].plot(x,y,c="k",lw=0.5)
+    axs[1].format(xlim=(90,165),ylim=(-15,20),coast=true,xlocator=90:15:165)
+    axs[1].colorbar(c,loc="b",title="Column Relative Humidity")
+
+    if !isdir(plotsdir("csfanim")); mkpath(plotsdir("csfanim")) end
+    f.savefig(plotsdir(
+        "csfanim/prcp-range.png"),
         transparent=false,dpi=200
     )
 
