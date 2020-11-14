@@ -48,7 +48,7 @@ axs[3].plot(x,y,c="k",lw=0.5)
 axs[3].format(rtitle="Intraseasonal Variability")
 axs[3].colorbar(c,loc="r")
 
-c = axs[4].contourf(lon,lat,dhr',cmap="Blues",levels=0:10)
+c = axs[4].contourf(lon,lat,dhr',cmap="Blues",levels=0:10,extend="max")
 axs[4].plot(x,y,c="k",lw=0.5)
 axs[4].format(rtitle="Diurnal Variability")
 axs[4].colorbar(c,loc="r")

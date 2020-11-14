@@ -118,9 +118,11 @@ It is immediately apparent that at 50-60% CSF, rainfall over the islands of the 
 
 ## 3. Mean Climatology of Column Saturation Fraction in the Maritime Continent
 
-Text
+The mean climatology of column saturation fraction is largely as expected, with CSF being highest over land in the Maritime Continent, and near the equator, with gradual decrease as one moves polewards.  However, the same cannot be said for intraseasonal and seasonal variability.  Indeed, although it is expected that seasonal variability would be lower closer to the equator, we see that intraseasonal variability also decreases near the equator, which is interesting because of phenomenon like the Madden-Julian Oscillation that alternatively crosses over the Maritime Continent with wet and dry phases.
 
 ![CSFspatial](figures/csf.png)
+
+The most distinct feature, however, is the diurnal cycle of CSF, which is greatly confined to over land, and especially over the Maritime Continent in the deep tropics.  It remains to be seen if this high variability is present over all land areas in the tropics, or if this region is specific to the Maritime Continent.
 
 ## Installation
 

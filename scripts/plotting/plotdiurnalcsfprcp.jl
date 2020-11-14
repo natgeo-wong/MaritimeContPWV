@@ -113,7 +113,7 @@ function plotcsfprcp(
 
     c = axs[1].contourf(
         rlon,rlat,rprcp',
-        cmap="Blues",levels=0:10,extend="max"
+        cmap="Blues",levels=0:0.25:2.5,extend="max"
     )
     axs[1].plot(x,y,c="k",lw=0.5)
     axs[1].format(xlim=(90,165),ylim=(-15,20),coast=true,xlocator=90:15:165)
