@@ -6,9 +6,13 @@ using PyCall
 using LaTeXStrings
 pplt = pyimport("proplot");
 
-function plotPEcurvegeneral(dID::AbstractString; density::Integer=25)
+function plotPEcurvegeneral(dID::AbstractString, month::Integer=0; density::Integer=25)
 
-    @load "$(datadir("compiled/csfVprcp/$(dID).jld2"))" prcp freq csf
+    if iszero(month)
+          @load "$(datadir("compiled/csfVprcp/$(dID).jld2"))" prcp freq csf
+    else; @load "$(datadir("compiled/csfVprcp/$(dID)-$month.jld2"))" prcp freq csf
+    end
+
     if uppercase(dID) == "ERA5"
           prcp = prcp * 1000 # Units is in m (hourly, so no adjust for time)
     else; prcp = prcp * 3600 # Units is in mm s-1
@@ -23,11 +27,15 @@ function plotPEcurvegeneral(dID::AbstractString; density::Integer=25)
 end
 
 function plotPEcurvelandsea(
-      dID::AbstractString, jj::Integer;
+      dID::AbstractString, jj::Integer, month::Integer=0;
       coast::Real=0.5, density::Real=0.05
 )
 
-    @load "$(datadir("compiled/csfVprcp/$(dID).jld2"))" prcp freq csf
+    if iszero(month)
+          @load "$(datadir("compiled/csfVprcp/$(dID).jld2"))" prcp freq csf
+    else; @load "$(datadir("compiled/csfVprcp/$(dID)-$month.jld2"))" prcp freq csf
+    end
+
     if uppercase(dID) == "ERA5"
           prcp = prcp * 1000 # Units is in m (hourly, so no adjust for time)
     else; prcp = prcp * 3600 # Units is in mm s-1
@@ -122,3 +130,25 @@ plotPEcurvelandsea("gpm",2,density=0.05);
 plotPEcurvelandsea("era5",3,density=0.05);
 
 f.savefig(plotsdir("PCcurve.png"),transparent=false,dpi=200)
+
+for mo in 1 : 12
+
+    pplt.close();
+    sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
+                                # f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
+
+    plotPEcurvegeneral("gpm",mo);
+    plotPEcurvegeneral("era5",mo);
+    axs[1].format(
+        xlim=(0,120),
+        ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
+        title="Summary",abc=true,
+        suptitle="P-C curve"
+    )
+
+    plotPEcurvelandsea("gpm",2,mo,density=0.05);
+    plotPEcurvelandsea("era5",3,mo,density=0.05);
+
+    f.savefig(plotsdir("PCcurve-$mo.png"),transparent=false,dpi=200)
+
+end
