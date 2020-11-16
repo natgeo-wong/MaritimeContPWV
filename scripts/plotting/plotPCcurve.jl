@@ -6,7 +6,7 @@ using PyCall
 using LaTeXStrings
 pplt = pyimport("proplot");
 
-function plotPEcurvegeneral(dID::AbstractString, month::Integer=0; density::Integer=25)
+function plotPEcurvegeneral(dID::AbstractString, axs, month::Integer=0; density::Integer=25)
 
     if iszero(month)
           @load "$(datadir("compiled/csfVprcp/$(dID).jld2"))" prcp freq csf
@@ -27,7 +27,7 @@ function plotPEcurvegeneral(dID::AbstractString, month::Integer=0; density::Inte
 end
 
 function plotPEcurvelandsea(
-      dID::AbstractString, jj::Integer, month::Integer=0;
+      dID::AbstractString, jj::Integer,axs, month::Integer=0;
       coast::Real=0.5, density::Real=0.05
 )
 
@@ -95,7 +95,6 @@ function plotPEcurvelandsea(
     prcplnd25[freqlnd.<density] .= NaN
     prcplnd75[freqlnd.<density] .= NaN
 
-
     axs[jj].plot(csf,prcpall,lw=1,label="All",legend="ul",c="k")
 
     axs[jj].plot(csf,prcpsea,fadedata=[prcpsea25,prcpsea75],lw=1,c="b")
@@ -113,23 +112,23 @@ function plotPEcurvelandsea(
 end
 
 
-pplt.close();
-sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
-                            # f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
-
-plotPEcurvegeneral("gpm");
-plotPEcurvegeneral("era5");
-axs[1].format(
-    xlim=(0,120),
-    ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
-    title="Summary",abc=true,
-    suptitle="P-C curve"
-)
-
-plotPEcurvelandsea("gpm",2,density=0.05);
-plotPEcurvelandsea("era5",3,density=0.05);
-
-f.savefig(plotsdir("PCcurve.png"),transparent=false,dpi=200)
+# pplt.close();
+# sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
+#                             # f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
+#
+# plotPEcurvegeneral("gpm");
+# plotPEcurvegeneral("era5");
+# axs[1].format(
+#     xlim=(0,120),
+#     ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
+#     title="Summary",abc=true,
+#     suptitle="P-C curve"
+# )
+#
+# plotPEcurvelandsea("gpm",2,density=0.05);
+# plotPEcurvelandsea("era5",3,density=0.05);
+#
+# f.savefig(plotsdir("PCcurve.png"),transparent=false,dpi=200)
 
 for mo in 1 : 12
 
@@ -137,17 +136,17 @@ for mo in 1 : 12
     sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
                                 # f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
 
-    plotPEcurvegeneral("gpm",mo);
-    plotPEcurvegeneral("era5",mo);
+    plotPEcurvegeneral("gpm",axs,mo);
+    plotPEcurvegeneral("era5",axs,mo);
     axs[1].format(
         xlim=(0,120),
         ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
         title="Summary",abc=true,
-        suptitle="P-C curve"
+        suptitle="P-C curve ($(monthname(mo)))"
     )
 
-    plotPEcurvelandsea("gpm",2,mo,density=0.05);
-    plotPEcurvelandsea("era5",3,mo,density=0.05);
+    plotPEcurvelandsea("gpm",2,axs,mo,density=0.05);
+    plotPEcurvelandsea("era5",3,axs,mo,density=0.05);
 
     f.savefig(plotsdir("PCcurve-$mo.png"),transparent=false,dpi=200)
 

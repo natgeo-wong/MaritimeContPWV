@@ -7,11 +7,15 @@ using LaTeXStrings
 pplt = pyimport("proplot");
 
 function plotPEcurvelandsea(
-      dID::AbstractString, jj::Integer;
+      dID::AbstractString, jj::Integer, axs; month::Integer=0,
       csfthr::Real, coast::Real=0.5, density::Real=0.05
 )
 
-    @load "$(datadir("compiled/csfVprcp/$(dID).jld2"))" prcp freq csf
+    if iszero(month)
+          @load "$(datadir("compiled/csfVprcp/$(dID).jld2"))" prcp freq csf
+    else; @load "$(datadir("compiled/csfVprcp/$(dID)-$month.jld2"))" prcp freq csf
+    end
+
     if uppercase(dID) == "ERA5"
           prcp = prcp * 1000 # Units is in m (hourly, so no adjust for time)
     else; prcp = prcp * 3600 # Units is in mm s-1
@@ -38,7 +42,7 @@ function plotPEcurvelandsea(
     axs[jj].contourf(
         lon,lat,prcps[:,:,iicsf]'/prcpsea[iicsf],
         norm="segmented",cmap="drywet",extend="both",
-        levels=[0.05,0.1,0.2,0.5,0.67,1.5,2,5,10,20]
+        levels=[0.05,0.1,0.2,0.5,0.67,1,1.5,2,5,10,20]
     )
     axs[jj].plot(x,y,c="k",lw=0.5)
     axs[jj].format(
@@ -48,28 +52,32 @@ function plotPEcurvelandsea(
 
 end
 
-pplt.close(); f,axs = pplt.subplots(nrows=5,ncols=2,aspect=15/7,axwidth=3)
+for mo = 1 : 12
 
-c = axs[1].contourf(
-    [1,2],[1,2],ones(2,2)*NaN,
-    norm="segmented",cmap="drywet",extend="both",
-    levels=[0.05,0.1,0.2,0.5,0.67,1.5,2,5,10,20]
-)
+    pplt.close(); f,axs = pplt.subplots(nrows=5,ncols=2,aspect=15/7,axwidth=3)
 
-plotPEcurvelandsea("gpm",1,csfthr=40)
-plotPEcurvelandsea("gpm",3,csfthr=50)
-plotPEcurvelandsea("gpm",5,csfthr=60)
-plotPEcurvelandsea("gpm",7,csfthr=70)
-plotPEcurvelandsea("gpm",9,csfthr=90)
+    c = axs[1].contourf(
+        [1,2],[1,2],ones(2,2)*NaN,
+        norm="segmented",cmap="drywet",extend="both",
+        levels=[0.05,0.1,0.2,0.5,0.67,1,1.5,2,5,10,20]
+    )
 
-plotPEcurvelandsea("era5",2,csfthr=40)
-plotPEcurvelandsea("era5",4,csfthr=50)
-plotPEcurvelandsea("era5",6,csfthr=60)
-plotPEcurvelandsea("era5",8,csfthr=70)
-plotPEcurvelandsea("era5",10,csfthr=90)
+    plotPEcurvelandsea("gpm",1,axs,month=mo,csfthr=40)
+    plotPEcurvelandsea("gpm",3,axs,month=mo,csfthr=50)
+    plotPEcurvelandsea("gpm",5,axs,month=mo,csfthr=60)
+    plotPEcurvelandsea("gpm",7,axs,month=mo,csfthr=70)
+    plotPEcurvelandsea("gpm",9,axs,month=mo,csfthr=90)
 
-axs[1].format(title="GPM",suptitle="Rainfall Rate / Ratio against Domain Ocean Mean")
-axs[2].format(title="ERA5")
+    plotPEcurvelandsea("era5",2,axs,month=mo,csfthr=40)
+    plotPEcurvelandsea("era5",4,axs,month=mo,csfthr=50)
+    plotPEcurvelandsea("era5",6,axs,month=mo,csfthr=60)
+    plotPEcurvelandsea("era5",8,axs,month=mo,csfthr=70)
+    plotPEcurvelandsea("era5",10,axs,month=mo,csfthr=90)
 
-f.colorbar(c,loc="r")
-f.savefig(plotsdir("csfspatial-ratio.png"),transparent=false,dpi=200)
+    axs[1].format(title="GPM",suptitle="Rainfall Rate ($(monthname(mo))) / Ratio against Domain Ocean Mean")
+    axs[2].format(title="ERA5")
+
+    f.colorbar(c,loc="r")
+    f.savefig(plotsdir("csfspatial-ratio-$mo.png"),transparent=false,dpi=200)
+
+end
