@@ -52,32 +52,58 @@ function plotPEcurvelandsea(
 
 end
 
-for mo = 1 : 12
+pplt.close(); f,axs = pplt.subplots(nrows=5,ncols=2,aspect=15/7,axwidth=3)
 
-    pplt.close(); f,axs = pplt.subplots(nrows=5,ncols=2,aspect=15/7,axwidth=3)
+c = axs[1].contourf(
+    [1,2],[1,2],ones(2,2)*NaN,
+    norm="segmented",cmap="drywet",extend="both",
+    levels=[0.05,0.1,0.2,0.5,0.67,1,1.5,2,5,10,20]
+)
 
-    c = axs[1].contourf(
-        [1,2],[1,2],ones(2,2)*NaN,
-        norm="segmented",cmap="drywet",extend="both",
-        levels=[0.05,0.1,0.2,0.5,0.67,1,1.5,2,5,10,20]
-    )
+plotPEcurvelandsea("gpm",1,axs,csfthr=40)
+plotPEcurvelandsea("gpm",3,axs,csfthr=50)
+plotPEcurvelandsea("gpm",5,axs,csfthr=60)
+plotPEcurvelandsea("gpm",7,axs,csfthr=70)
+plotPEcurvelandsea("gpm",9,axs,csfthr=85)
 
-    plotPEcurvelandsea("gpm",1,axs,month=mo,csfthr=40)
-    plotPEcurvelandsea("gpm",3,axs,month=mo,csfthr=50)
-    plotPEcurvelandsea("gpm",5,axs,month=mo,csfthr=60)
-    plotPEcurvelandsea("gpm",7,axs,month=mo,csfthr=70)
-    plotPEcurvelandsea("gpm",9,axs,month=mo,csfthr=90)
+plotPEcurvelandsea("era5",2,axs,csfthr=40)
+plotPEcurvelandsea("era5",4,axs,csfthr=50)
+plotPEcurvelandsea("era5",6,axs,csfthr=60)
+plotPEcurvelandsea("era5",8,axs,csfthr=70)
+plotPEcurvelandsea("era5",10,axs,csfthr=85)
 
-    plotPEcurvelandsea("era5",2,axs,month=mo,csfthr=40)
-    plotPEcurvelandsea("era5",4,axs,month=mo,csfthr=50)
-    plotPEcurvelandsea("era5",6,axs,month=mo,csfthr=60)
-    plotPEcurvelandsea("era5",8,axs,month=mo,csfthr=70)
-    plotPEcurvelandsea("era5",10,axs,month=mo,csfthr=90)
+axs[1].format(title="GPM",suptitle="Rainfall Rate / Ratio against Domain Ocean Mean")
+axs[2].format(title="ERA5")
 
-    axs[1].format(title="GPM",suptitle="Rainfall Rate ($(monthname(mo))) / Ratio against Domain Ocean Mean")
-    axs[2].format(title="ERA5")
+f.colorbar(c,loc="r")
+f.savefig(plotsdir("csfspatial-ratio.png"),transparent=false,dpi=200)
 
-    f.colorbar(c,loc="r")
-    f.savefig(plotsdir("csfspatial-ratio-$mo.png"),transparent=false,dpi=200)
-
-end
+# for mo = 1 : 12
+#
+#     pplt.close(); f,axs = pplt.subplots(nrows=5,ncols=2,aspect=15/7,axwidth=3)
+#
+#     c = axs[1].contourf(
+#         [1,2],[1,2],ones(2,2)*NaN,
+#         norm="segmented",cmap="drywet",extend="both",
+#         levels=[0.05,0.1,0.2,0.5,0.67,1,1.5,2,5,10,20]
+#     )
+#
+#     plotPEcurvelandsea("gpm",1,axs,month=mo,csfthr=40)
+#     plotPEcurvelandsea("gpm",3,axs,month=mo,csfthr=50)
+#     plotPEcurvelandsea("gpm",5,axs,month=mo,csfthr=60)
+#     plotPEcurvelandsea("gpm",7,axs,month=mo,csfthr=70)
+#     plotPEcurvelandsea("gpm",9,axs,month=mo,csfthr=85)
+#
+#     plotPEcurvelandsea("era5",2,axs,month=mo,csfthr=40)
+#     plotPEcurvelandsea("era5",4,axs,month=mo,csfthr=50)
+#     plotPEcurvelandsea("era5",6,axs,month=mo,csfthr=60)
+#     plotPEcurvelandsea("era5",8,axs,month=mo,csfthr=70)
+#     plotPEcurvelandsea("era5",10,axs,month=mo,csfthr=85)
+#
+#     axs[1].format(title="GPM",suptitle="Rainfall Rate ($(monthname(mo))) / Ratio against Domain Ocean Mean")
+#     axs[2].format(title="ERA5")
+#
+#     f.colorbar(c,loc="r")
+#     f.savefig(plotsdir("csfspatial-ratio-$mo.png"),transparent=false,dpi=200)
+#
+# end

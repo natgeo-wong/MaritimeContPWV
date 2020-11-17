@@ -110,19 +110,37 @@ For Column Saturation Fraction (CSF) values which, in the plot above, have a pro
 
 We see that there is a noticeable difference in the relationship between precipitation rate and column-saturation fraction over land and sea.  This difference is seen when GPM IMERG precipitation is used, but is much less noticeable (except at lower CSF) in ERA5.  From GPM-IMERG, it can be seen that the relationship between CSF and rainfall rate is weaker on land compared to over the ocean, such that at high CSF, the rainfall rate is lower.  For mid-saturation levels of CSF (50-60%), we see that rainfall is slightly higher over land than on ocean.
 
-We also investigate the spatial distribution of average rainfall rate for four different values of CSF: 25%, 50%, 75% and 90%, as a ratio of the domain-averaged rainfall over all ocean grid-points.
+We also investigate the spatial distribution of average rainfall rate for five different values of CSF: 40%, 50%, 60%, 70% and 85%, as a ratio of the domain-averaged rainfall over all ocean grid-points.
 
 ![CSFspatial](figures/csfspatial-ratio.png)
 
 It is immediately apparent that at 50-60% CSF, rainfall over the islands of the Maritime Continent is noticeably enhanced compared to the surrounding ocean.  However, at a CSF of 90%, rainfall over the islands is noticeable lower than the surrounding seas.  Lastly, we also see that rainfall over the ocean near the equator is noticeably lower than rainfall rates as one moves polewards towards the subtropics.  It remains to be seen if this is due to the presence of islands, as opposed to this being a latitude effect.
 
-## 3. Mean Climatology of Column Saturation Fraction in the Maritime Continent
+## 3. Climatology of Column Saturation Fraction in the Maritime Continent
+
+### A. Mean Climatology
 
 The mean climatology of column saturation fraction is largely as expected, with CSF being highest over land in the Maritime Continent, and near the equator, with gradual decrease as one moves polewards.  However, the same cannot be said for intraseasonal and seasonal variability.  Indeed, although it is expected that seasonal variability would be lower closer to the equator, we see that intraseasonal variability also decreases near the equator, which is interesting because of phenomenon like the Madden-Julian Oscillation that alternatively crosses over the Maritime Continent with wet and dry phases.
 
 ![CSFspatial](figures/csf.png)
 
 The most distinct feature, however, is the diurnal cycle of CSF, which is greatly confined to over land, and especially over the Maritime Continent in the deep tropics.  It remains to be seen if this high variability is present over all land areas in the tropics, or if this region is specific to the Maritime Continent.
+
+### B. Monthly / Seasonal Climatology
+
+The seasonal variability of monthly-mean CSF is very similar to that from rainfall. Furthermore, we see that the amplitude of diurnal variability also seems to follow this seasonal trend, though of course the amplitude is greater over land than over the ocean most of the time.  We also see that CSF variability is generally higher over regions with complex topography compared to the coastlines.
+
+![CSFspatial](figures/csf-monthly.gif)
+
+## 4. Seasonal Cycle of CSF-Precipitation Rate relationship
+
+Another part of this project is to investigate the seasonal cycle of the CSF-precipitation relationship.
+
+![CSFspatial](figures/PCcurve-monthly.gif)
+
+We see that despite seasonal fluctuations in GPM precipitation rate when CSF ranges from 40-70%, the weaker relationship between CSF and precipitation rate over land never truly vanishes.  Furthermore, the relationship between CSF and precipitation rates at high column saturation fraction (>75%), never really changes significantly, and precipitation rates over the ocean at high CSF are higher (by maybe 2-3x) than over land.  This relationship is only noted in GPM IMERG observations.  We see that in ERA5, the relationship between CSF and rainfall rate over land and sea is very similar for high CSF, which implies that there are errors in our assumptions about the similarity of convective dynamics over land and ocean when the atmosphere is moist.
+
+We also plot the spatial evolution of 
 
 ## Installation
 

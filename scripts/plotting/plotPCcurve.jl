@@ -64,7 +64,7 @@ function plotPEcurvelandsea(
     for icsf = 1 : nbins
 
         prcpseaii = prcps[:,:,icsf]; prcpseaii = prcpseaii[lsmsea]
-        prcpseaii[isnan.(prcpseaii)] .= 0
+        prcpseaii = prcpseaii[.!isnan.(prcpseaii)]
 
         if !isempty(prcpseaii)
             prcpsea25[icsf] = percentile(prcpseaii,5)
@@ -72,7 +72,7 @@ function plotPEcurvelandsea(
         end
 
         prcplndii = prcps[:,:,icsf]; prcplndii = prcplndii[lsmlnd]
-        prcplndii[isnan.(prcplndii)] .= 0
+        prcplndii = prcplndii[.!isnan.(prcplndii)]
 
         if !isempty(prcplndii)
             prcplnd25[icsf] = percentile(prcplndii,5)
