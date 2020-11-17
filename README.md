@@ -140,7 +140,11 @@ Another part of this project is to investigate the seasonal cycle of the CSF-pre
 
 We see that despite seasonal fluctuations in GPM precipitation rate when CSF ranges from 40-70%, the weaker relationship between CSF and precipitation rate over land never truly vanishes.  Furthermore, the relationship between CSF and precipitation rates at high column saturation fraction (>75%), never really changes significantly, and precipitation rates over the ocean at high CSF are higher (by maybe 2-3x) than over land.  This relationship is only noted in GPM IMERG observations.  We see that in ERA5, the relationship between CSF and rainfall rate over land and sea is very similar for high CSF, which implies that there are errors in our assumptions about the similarity of convective dynamics over land and ocean when the atmosphere is moist.
 
-We also plot the spatial evolution of 
+We also plot the spatial evolution of rainfall rate at different CSF values, as a ratio of the domain-averaged precipitation rate over the **ocean**.  It becomes obvious that over the ocean, regions where precipitation rate is lower for a given CSF coincide with regions where CSF is generally higher than the domain average.  This is especially obvious when CSF is low.  In a way, this makes some kind of convoluted sense, in that regions where CSF is normally low and expected to be low, when the CSF is higher than usual it would be expected that rainfall rate would be higher than usual.
+
+![CSFspatial](figures/csfspatial-ratio-monthly.gif)
+
+However, we see that for CSF ~60%, the rate of precipitation is higher over land compared to over the ocean, and that for high CSF (>75%), that rainfall rate over land is lower compared to over the ocean.  We note that for a given month, at very high and low CSF values, there are no data available.  This largely means that during this period, the CSF over this region/grid point never reaches the CSF value stated.  This is expected, for example, over the belt of maximum precipitation, where the CSF values are expected to be high, and therefore it is not unreasonable that the CSF values do not drop this low (~40%) in regions where precipitation is seasonally concentrated for this period of time.
 
 ## Installation
 
