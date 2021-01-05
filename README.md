@@ -24,7 +24,7 @@ This repository contains the analysis scripts and output for the **MaritimeContP
 
 * [ ] Produce TPW-Precipitation curve over land, ocean and coastline
    - [x] General overview curve
-   - [ ] Compare curve in different times of year / season
+   - [x] Compare curve in different times of year / season
    - [ ] Compare against MJO-Phase/Amplitude data
 
 ## 0. Motivation
