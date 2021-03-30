@@ -1,3 +1,4 @@
 #(1)Mode,(2)ID,(3)IDnc,(4)era5,(5)erai,(6)Full,(7)Units
 csfc,swp,NA,saturated_vapour_path,NA,Saturated Vapour Path,kg m**-2
 csfc,csf,NA,fraction_column_saturation,NA,Column Saturation Fraction,%
+csfc,Pi_RE5,NA,NA,NA,Pi Constant (ZWD to PWD),m/m
