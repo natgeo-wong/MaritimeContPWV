@@ -8,22 +8,24 @@ using NumericalIntegration
 
 include(srcdir("common.jl"))
 
-function t2esat(T::Real)
+function t2esat(T::Real,P::Real)
 
     tb = T - 273.15
     if tb <= 0
-    	return esat = exp(43.494 - 6545.8/(tb+278)) / (tb+868)^2
+    	esat = exp(43.494 - 6545.8/(tb+278)) / (tb+868)^2
     else
-    	return esat = exp(34.494 - 4924.99/(tb+237.1)) / (tb+105)^1.57
+    	esat = exp(34.494 - 4924.99/(tb+237.1)) / (tb+105)^1.57
     end
+
+    r = 0.622 * esat / max(esat,P-esat)
+    return r / (1+r)
 
 end
 
 function calcswp(
     esat::AbstractVector{<:Real},
     pre::AbstractVector{<:Real},
-    psfc::Real,
-    pdummy::AbstractVector{<:Real}
+    psfc::Real
 )
 
     r = cumul_integrate(pre,esat) / 1000 / 9.81
@@ -33,7 +35,7 @@ function calcswp(
 
 end
 
-function csf(
+function swp(
     init::Dict,eroot::Dict,sroot::Dict;
     regID::AbstractString="GLB", timeID::Union{Integer,Vector}=0,
     gres::Real=0
@@ -66,10 +68,10 @@ function csf(
     for dtii in datevec
 
         @info "$(Dates.now()) - Preallocating arrays for $(uppercase(emod["dataset"])) $(epar["name"]) data in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(dtii)) $(Dates.monthname(dtii)) ..."
-        nhr = ehr * daysinmonth(dtii); csf = zeros(nlon,nlat,nhr);
+        nhr = ehr * daysinmonth(dtii); swp = zeros(nlon,nlat,nhr);
 
         pds,pvar = erarawread(pmod,ppar,ereg,eroot,dtii);
-        tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii);
+        sds,svar = erarawread(smod,spar,ereg,eroot,dtii);
 
         @info "$(Dates.now()) - Calculating $(uppercase(emod["dataset"])) $(epar["name"]) data in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(dtii)) $(Dates.monthname(dtii)) ..."
 
@@ -80,21 +82,21 @@ function csf(
 
             for ip = 1 : np; pre = Int16(p[ip+1]/100);
                 tpar["level"] = pre; tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii);
-                Ta[:,:,ip] .= Ta[:,:,it]*1; close(tds);
+                Ta[:,:,ip] .= tvar[:,:,it]*1; close(tds);
             end
 
             for ilat = 1 : nlat, ilon = 1 : nlon
 
-                for ip = 1 : np; esat[ip+1] = t2esat(Ta[ilon,ilat,ip]) end
+                for ip = 1 : np; esat[ip+1] = t2esat(Ta[ilon,ilat,ip],p[ip+1]) end
                 p[end] = ps[ilon,ilat]
-                esat[end] = t2esat(Ts[ilon,ilat])
+                esat[end] = t2esat(Ts[ilon,ilat],p[end])
                 swp[ilon,ilat,it] = calcswp(esat,p,ps[ilon,ilat])
 
             end
 
         end
 
-        close(pds); close(tds);
+        close(pds); close(sds);
         erarawsave(swp,emod,epar,ereg,dtii,sroot)
 
     end
