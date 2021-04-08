@@ -35,7 +35,7 @@ function csf(
         @info "$(Dates.now()) - Calculating $(uppercase(emod["dataset"])) $(epar["name"]) data in $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) for $(year(dtii)) $(Dates.monthname(dtii)) ..."
 
         tcwv = cvar[:] * 1
-        swp  = svar[:] * 1
+        swp  = svar[:] * 1000
         csf  = tcwv ./ swp * 100
 
         close(cds); close(sds);
