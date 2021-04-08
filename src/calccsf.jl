@@ -36,7 +36,7 @@ function csf(
 
         tcwv = cvar[:] * 1
         swp  = svar[:] * 1
-        csf  = tcwv ./ swp
+        csf  = tcwv ./ swp * 100
 
         close(cds); close(sds);
         erarawsave(csf,emod,epar,ereg,dtii,sroot)
