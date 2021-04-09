@@ -28,7 +28,7 @@ function calcswp(
     psfc::Real
 )
 
-    r = cumul_integrate(pre,esat) / 1000 / 9.81
+    r = cumul_integrate(pre,esat) / 9.81
     r[1] = 0
     if psfc <= 100000; pre[end] = 101235 end
     spl = Spline1D(pre,r,k=1); return spl(psfc)
