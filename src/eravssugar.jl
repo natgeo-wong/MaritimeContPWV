@@ -27,6 +27,7 @@ function eravsugar(
     ngps = length(gpwv); nera = length(epwv);
     gve  = zeros(Int64,ngps-1,nera-1)
 	it = 1
+	rms = 0
 
     @info "$(Dates.now()) - Comparing GNSS ZWD vs ECMWF reanalysis TCW"
 
@@ -52,6 +53,7 @@ function eravsugar(
 
 			if !isempty(gtcw)
             	gve += fit(Histogram,(gtcw,etcw),(gpwv,epwv)).weights
+				rms += sum((gtcw.-etcw).^2)
 			end
 
         end
@@ -61,6 +63,7 @@ function eravsugar(
 
     end
 
-    @save "$(datadir("compiled/ssugar.jld2"))" gve
+	rms = sqrt(rms/sum(gve))
+    @save "$(datadir("compiled/ssugar.jld2"))" gve rms
 
 end
