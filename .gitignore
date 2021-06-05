@@ -6,12 +6,16 @@
 data
 videos
 plots
-notebooks
+notebooks/*.png
 _research
 /Manifest.toml
 logs/
 references/**/*.pdf
 run/
+exp/run_*
+exp/prm/*sample*
+*.gif
+*.mp4
 
 ################################################################################
 #                        Cluster Job Submission Scripts                        #
