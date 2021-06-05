@@ -28,12 +28,12 @@ function csfVprcp_gpm(
     nbins::Integer=100
 )
 
-    global_logger(ConsoleLogger(stdout,Logging.Warn))
+    global_logger(ConsoleLogger(stderr,Logging.Warn))
     tmod,tpar,ereg,etime = erainitialize(
         init,
         modID="csfc",parID="csf",regID=regID,timeID=timeID
     );
-    global_logger(ConsoleLogger(stdout,Logging.Info))
+    global_logger(ConsoleLogger(stderr,Logging.Info))
 
     nlon,nlat = ereg["size"]; elon = ereg["lon"]; elat = ereg["lat"]
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
@@ -64,6 +64,8 @@ function csfVprcp_gpm(
         itmp1 = Array{Float32,2}(undef,2,24*ndy)
         itmp2 = Array{Float32,1}(undef,24*ndy)
 
+        @info "$(Dates.now()) - Binning GPM Precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
+
         for ilat = 1 : nlat, ilon = 1 : nlon
 
             prcpii = @view prcp[glon[ilon],glat[ilat],:];
@@ -80,19 +82,74 @@ function csfVprcp_gpm(
 
 end
 
+function csfVprcp_gpm(
+    init::AbstractDict, eroot::AbstractDict, sroot::AbstractString;
+    regID::AbstractString="GLB", dtii::TimeType,
+    nbins::Integer=100
+)
+
+    global_logger(ConsoleLogger(stderr,Logging.Warn))
+    tmod,tpar,ereg,_ = erainitialize(
+        init,
+        modID="csfc",parID="csf",regID=regID
+    );
+    global_logger(ConsoleLogger(stderr,Logging.Info))
+
+    nlon,nlat = ereg["size"]; elon = ereg["lon"]; elat = ereg["lat"]
+
+    @info "$(Dates.now()) - Preallocating data arrays to compare precipitation against column saturation fraction ..."
+
+    tvec = collect(0:nbins); nvec = length(tvec); tstep = (tvec[2]-tvec[1])/2
+    pmat = Array{Float32,3}(undef,nlon,nlat,nvec)
+    pfrq = Array{Int64,3}(undef,nlon,nlat,nvec)
+
+    @info "$(Dates.now()) - Extracting relevant closest-coordinate points of GPM precipitation for each of the ERA5 column saturation fraction grid points ..."
+
+    lon,lat = gpmlonlat(); rlon,rlat,_ = gregiongridvec(regID,lon,lat);
+    glon = zeros(Int32,nlon); for i = 1 : nlon; glon[i] = argmin(abs.(elon[i] .- rlon)) end
+    glat = zeros(Int32,nlat); for i = 1 : nlat; glat[i] = argmin(abs.(elat[i] .- rlat)) end
+
+    @info "$(Dates.now()) - Extracting ERA5 column saturation fraction data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
+
+    ndy = daysinmonth(dtii)
+    tds,tvar = erarawread(tmod,tpar,ereg,eroot,dtii); tcwv = tvar[:]*1; close(tds)
+
+    @info "$(Dates.now()) - Extracting GPM Precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
+
+    pds,pvar = clisatrawread("gpmimerg","prcp_rate",dtii,regID,path=sroot);
+    prcp  = pvar[:]*1; close(pds)
+    itmp1 = Array{Float32,2}(undef,2,24*ndy)
+    itmp2 = Array{Float32,1}(undef,24*ndy)
+
+    @info "$(Dates.now()) - Binning GPM Precipitation data for $(gregionfullname(ereg["region"])) (Horizontal Resolution: $(ereg["step"])) during $(year(dtii)) $(Dates.monthname(dtii)) ..."
+
+    for ilat = 1 : nlat, ilon = 1 : nlon
+
+        prcpii = @view prcp[glon[ilon],glat[ilat],:];
+        itmp1 .= reshape(prcpii,2,:);
+        itmp2 .= dropdims(mean(itmp1,dims=1),dims=1)
+        tcwvii = @view tcwv[ilon,ilat,:]
+        pmat[ilon,ilat,:],pfrq[ilon,ilat,:] = pecurve(itmp2,tcwvii,tvec,tstep)
+
+    end
+
+    csfVprcpsave(pmat,pfrq,tvec,ereg,dtii,"gpm")
+
+end
+
 function csfVprcp_era(
     init::AbstractDict, eroot::AbstractDict;
     regID::AbstractString="GLB", timeID::Union{Integer,Vector}=0,
     nbins::Integer=100
 )
 
-    global_logger(ConsoleLogger(stdout,Logging.Warn))
+    global_logger(ConsoleLogger(stderr,Logging.Warn))
     tmod,tpar,ereg,etime = erainitialize(
         init,
         modID="csfc",parID="csf",regID=regID,timeID=timeID
     );
     pmod,ppar,____,_____ = erainitialize(init,modID="msfc",parID="prcp_tot");
-    global_logger(ConsoleLogger(stdout,Logging.Info))
+    global_logger(ConsoleLogger(stderr,Logging.Info))
 
     nlon,nlat = ereg["size"];
     datevec = collect(Date(etime["Begin"],1):Month(1):Date(etime["End"],12));
