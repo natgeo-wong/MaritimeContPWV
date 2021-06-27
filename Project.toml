@@ -3,7 +3,6 @@ authors = ["Nathanael Wong <natgeo.wong@outlook.com>"]
 
 [deps]
 ClimateERA = "96028d6e-f290-464b-8a03-1e746e0363c3"
-ClimateSatellite = "d91beb5f-3141-4656-855d-efd5d97b23c4"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
