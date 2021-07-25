@@ -1,0 +1,6 @@
+# RectRegion
+# Template for User-Defined RectRegion GeoRegions
+# (1)ID, (2)pID, (3)N, (4)W, (5)S, (6)E, (7)Description, (8)Notes
+
+SEA, GLB, 20, 90, -15, 165, Rectangle-Southeast-Asia
+SMT, SEA, 6, 95, -6, 107, Sumatra
