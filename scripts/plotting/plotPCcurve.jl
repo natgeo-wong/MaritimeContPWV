@@ -47,16 +47,16 @@ function plotPEcurvelandsea(
     freqall = dropdims(sum(freq,dims=(1,2)),dims=(1,2))
     prcpall = dropdims(sum(prcp,dims=(1,2)),dims=(1,2)) ./ freqall
     freqall = freqall / sum(freqall) * nbins
-    prcpall[freqall.<density] .= NaN
+    # prcpall[freqall.<density] .= NaN
 
-    mds = Dataset(datadir("era5-SEAx0.25-lsm.nc")); lsm = mds["lsm"][:]*1; close(mds)
+    mds = Dataset(datadir("era5-TRPx0.25-lsm.nc")); lsm = mds["lsm"][:]*1; close(mds)
     lsmsea = lsm .< coast; lsmlnd = lsm .> coast
 
     freqsea = freq .* lsmsea; prcpsea = prcp .* lsmsea
     freqlnd = freq .* lsmlnd; prcplnd = prcp .* lsmlnd
 
-    lsmsea = dropdims(lsmsea,dims=3)
-    lsmlnd = dropdims(lsmlnd,dims=3)
+    # lsmsea = dropdims(lsmsea,dims=3)
+    # lsmlnd = dropdims(lsmlnd,dims=3)
 
     prcpsea25 = zeros(nbins); prcpsea50 = zeros(nbins); prcpsea75 = zeros(nbins)
     prcplnd25 = zeros(nbins); prcplnd50 = zeros(nbins); prcplnd75 = zeros(nbins)
@@ -84,6 +84,7 @@ function plotPEcurvelandsea(
     freqsea = dropdims(sum(freqsea,dims=(1,2)),dims=(1,2))
     prcpsea = dropdims(sum(prcpsea,dims=(1,2)),dims=(1,2)) ./ freqsea
     freqsea = freqsea / sum(freqsea) * nbins
+    prcpsea2 = deepcopy(prcpsea)
     prcpsea[freqsea.<density] .= NaN
     prcpsea25[freqsea.<density] .= NaN
     prcpsea75[freqsea.<density] .= NaN
@@ -91,6 +92,7 @@ function plotPEcurvelandsea(
     freqlnd = dropdims(sum(freqlnd,dims=(1,2)),dims=(1,2))
     prcplnd = dropdims(sum(prcplnd,dims=(1,2)),dims=(1,2)) ./ freqlnd
     freqlnd = freqlnd / sum(freqlnd) * nbins
+    prcplnd2 = deepcopy(prcplnd)
     prcplnd[freqlnd.<density] .= NaN
     prcplnd25[freqlnd.<density] .= NaN
     prcplnd75[freqlnd.<density] .= NaN
@@ -100,11 +102,11 @@ function plotPEcurvelandsea(
     axs[jj].plot(csf,prcpsea,fadedata=[prcpsea25,prcpsea75],lw=1,c="b")
     axs[jj].plot(csf,prcplnd,fadedata=[prcplnd25,prcplnd75],lw=1,c="g")
 
-    axs[jj].plot(csf,prcpsea,lw=1,label="Sea",legend="ul",c="b")
-    axs[jj].plot(csf,prcplnd,lw=1,label="Land",legend="ul",c="g")
+    axs[jj].plot(csf,prcpsea2,lw=1,label="Sea",legend="ul",c="b")
+    axs[jj].plot(csf,prcplnd2,lw=1,label="Land",legend="ul",c="g")
 
     axs[jj].format(
-        xlim=(0,nbins),xlabel="Column Saturation Fraction",
+        xlim=(0,100),xlabel="Column Saturation Fraction",
         ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
         title="Precipitation Data Source: $(uppercase(dID))",abc=true
     )
@@ -112,42 +114,42 @@ function plotPEcurvelandsea(
 end
 
 
-# pplt.close();
+pplt.close();
 # sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
-#                             # f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
-#
-# plotPEcurvegeneral("gpm");
-# plotPEcurvegeneral("era5");
+                            f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=3);
+
+# plotPEcurvegeneral("gpm",axs);
+# plotPEcurvegeneral("era5",axs);
 # axs[1].format(
-#     xlim=(0,120),
+#     xlim=(0,100),
 #     ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
 #     title="Summary",abc=true,
 #     suptitle="P-C curve"
 # )
+
+plotPEcurvelandsea("gpm",1,axs,density=0.05);
+plotPEcurvelandsea("era5",2,axs,density=0.05);
+
+f.savefig(plotsdir("PCcurve2.png"),transparent=false,dpi=200)
+
+# for mo in 1 : 12
 #
-# plotPEcurvelandsea("gpm",2,density=0.05);
-# plotPEcurvelandsea("era5",3,density=0.05);
+#     pplt.close();
+#     sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
+#                                 # f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
 #
-# f.savefig(plotsdir("PCcurve.png"),transparent=false,dpi=200)
-
-for mo in 1 : 12
-
-    pplt.close();
-    sb = [[0,1,1,0],[2,2,3,3]]; f,axs = pplt.subplots(sb,aspect=2,axwidth=3,sharex=3,sharey=3)
-                                # f,axs = pplt.subplots(ncols=2,aspect=2,axwidth=4);
-
-    plotPEcurvegeneral("gpm",axs,mo);
-    plotPEcurvegeneral("era5",axs,mo);
-    axs[1].format(
-        xlim=(0,120),
-        ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
-        title="Summary",abc=true,
-        suptitle="P-C curve ($(monthname(mo)))"
-    )
-
-    plotPEcurvelandsea("gpm",2,axs,mo,density=0.05);
-    plotPEcurvelandsea("era5",3,axs,mo,density=0.05);
-
-    f.savefig(plotsdir("PCcurve-$mo.png"),transparent=false,dpi=200)
-
-end
+#     plotPEcurvegeneral("gpm",axs,mo);
+#     plotPEcurvegeneral("era5",axs,mo);
+#     axs[1].format(
+#         xlim=(0,120),
+#         ylim=(1e-4,30),ylabel=L"Precipitation Rate / mm hr$^{-1}$",yscale="log",
+#         title="Summary",abc=true,
+#         suptitle="P-C curve ($(monthname(mo)))"
+#     )
+#
+#     plotPEcurvelandsea("gpm",2,axs,mo,density=0.05);
+#     plotPEcurvelandsea("era5",3,axs,mo,density=0.05);
+#
+#     f.savefig(plotsdir("PCcurve-$mo.png"),transparent=false,dpi=200)
+#
+# end

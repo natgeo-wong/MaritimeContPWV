@@ -55,8 +55,9 @@ function ploteravsgnsscompiled(dset::AbstractString,jj::Integer;title::AbstractS
     c = axs[jj].pcolormesh(
         0:100,0:100,gvec' ./ sgvec .* nbins,cmap="gnbu",
         #levels=0:0.1:1,extend="max"
-        norm="segmented",extend="max",
-        levels=[0,1,10,20,50,90,100],
+        norm="segmented",extend="both",
+        levels=15:15:150,
+        cmap_kw=Dict("left"=>0.02)
     )
     axs[jj].plot([0,100],[0,100],c="k",lw=0.2)
     axs[jj].format(
@@ -86,10 +87,11 @@ function ploteravsgnssnormal(dset::AbstractString,jj::Integer;title::AbstractStr
     c = axs[jj].pcolormesh(
         0:100,0:100,gvec' ./ mgvec,cmap="gnbu",
         levels=[0,0.01,0.1,0.2,0.5,0.9,1],
+        cmap_kw=Dict("left"=>0.1)
     )
     axs[jj].plot([0,100],[0,100],c="k",lw=0.2)
     axs[jj].format(
-        xlim=(0,100),xlabel="GNSS-derived Precipitable Water / mm",
+        xlim=(0,100),xlabel="GPS-derived Precipitable Water / mm",
         ylim=(0,100),ylabel="Reanalysis Precipitable Water / mm",
         suptitle="All GNSS observations",
         ultitle="$title\nNo. of Obs.: $(@sprintf("%d",sum(sgvec)))",grid="on",
@@ -122,15 +124,14 @@ mkpath(plotsdir("eravsgnss-$dset"))
 # end
 
 pplt.close(); f,axs = pplt.subplots(ncols=3,axwidth=2)
-c = ploteravsgnsscompiled("era5",1,title="ERA5 (hourly)")
-c = ploteravsgnsscompiled("era6",2,title="ERA5 (6-hourly)")
-c = ploteravsgnsscompiled("erai",3,title="ERA-Interim (6-hourly)")
+c = ploteravsgnsscompiled("era5",1,title="ERA5 (Hourly)")
+# c = ploteravsgnsscompiled("era6",2,title="ERA5 (6-Hourly)")
+c = ploteravsgnsscompiled("erady",2,title="ERA5 (Daily)")
 f.colorbar(c,loc="r",label="Density")
-f.savefig(plotsdir("eravgnsscompiled.png"),transparent=false,dpi=200)
+f.savefig(plotsdir("eravgnsscompiled2.png"),transparent=false,dpi=200)
 
-pplt.close(); f,axs = pplt.subplots(ncols=3,axwidth=2)
-c = ploteravsgnssnormal("era5",1,title="ERA5 (hourly)")
-c = ploteravsgnssnormal("era6",2,title="ERA5 (6-hourly)")
-c = ploteravsgnssnormal("erai",3,title="ERA-Interim (6-hourly)")
+pplt.close(); f,axs = pplt.subplots(ncols=2,axwidth=2)
+c = ploteravsgnssnormal("era5",1,title="ERA5 (Hourly)")
+c = ploteravsgnssnormal("erady",2,title="ERA5 (Daily)")
 f.colorbar(c,loc="r",label="Normalized Frequency")
-f.savefig(plotsdir("eravgnssnormal.png"),transparent=false,dpi=200)
+f.savefig(plotsdir("eravgnssnormal2.png"),transparent=false,dpi=200)

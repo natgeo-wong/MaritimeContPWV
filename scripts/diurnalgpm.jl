@@ -15,7 +15,7 @@ using PyCall
 using LaTeXStrings
 pplt = pyimport("proplot");
 
-mfit(t,p) = p[1] * cos.((t.-p[2])*pi/12)
+mfit(t,p) = p[1] * cos.((t.-p[2])*pi/12) + p[3]
 
 function retrieveprcp(
     sroot::AbstractString;
@@ -43,7 +43,7 @@ function retrieveprcp(
 
     gpm .= gpm / nt
     vart = zeros(49)
-    p0 = [0.5, 0.5]
+    p0 = [0.5,0.5,0]
 
     for ilat = 1 : nrlat, ilon = 1 : nrlon
 
@@ -58,7 +58,7 @@ function retrieveprcp(
 
         fit = curve_fit(mfit, 0:0.5:23.5, (@view gpm[ilon,ilat,:]), p0)
         if fit.param[1] < 0
-              θmat[ilon,ilat] = mod(fit.param[2]+24,24)
+              θmat[ilon,ilat] = mod(fit.param[2]+12,24)
         else; θmat[ilon,ilat] = mod(fit.param[2],24)
         end
 
