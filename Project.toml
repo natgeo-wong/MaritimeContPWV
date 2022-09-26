@@ -2,11 +2,11 @@ name = "MaritimeContPWV"
 authors = ["Nathanael Wong <natgeo.wong@outlook.com>"]
 
 [deps]
-ClimateERA = "96028d6e-f290-464b-8a03-1e746e0363c3"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+ERA5Reanalysis = "99c076f5-c00e-46eb-a0bd-7ba31777c146"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 GeoRegions = "b001f823-fa75-4bff-bf55-6610c8f3688a"
 ImageShow = "4e3cecfd-b093-5904-9786-8bbb286a6a31"
