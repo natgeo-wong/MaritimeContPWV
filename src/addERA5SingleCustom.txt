@@ -1,0 +1,5 @@
+# SingleCustom
+# Template for User-Defined Custom Pressure-Level Variables
+# (1)ID, (2)era5 (3)Full (4)Units
+scwv,saturated_column_water_vapor,Saturated Column Water Vapor,kg m**-2
+csf,column_saturation_fraction,Column Saturation Fraction,0-1
