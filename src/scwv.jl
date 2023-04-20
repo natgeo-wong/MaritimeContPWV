@@ -57,7 +57,7 @@ function calculatescwv(
     d2mvar   = SingleVariable("d2m")
     t2mvar   = SingleVariable("t2m")
     spvar    = SingleVariable("sp")
-    p = convert.(Float32,vcat(0,p,0)); np = length(p)
+    p = convert.(Float32,vcat(0,p*100,0)); np = length(p)
 
     @info "$(now()) - MaritimeContPWV - Preallocating temporary arrays for calculation ..."
     tint_q = zeros(Int16,nlon,nlat)
