@@ -57,7 +57,6 @@ function calculatescwv(
     d2mvar   = SingleVariable("d2m")
     t2mvar   = SingleVariable("t2m")
     spvar    = SingleVariable("sp")
-    tcwvvar  = SingleVariable("tcwv")
     p = convert.(Float32,vcat(0,p,0)); np = length(p)
 
     @info "$(now()) - MaritimeContPWV - Preallocating temporary arrays for calculation ..."
@@ -100,21 +99,21 @@ function calculatescwv(
             mv = tds["t2m"].attrib["missing_value"]
             fv = tds["t2m"].attrib["_FillValue"]
             NCDatasets.load!(tds["t2m"].var,tint_t,:,:,it)
-            int2real!(tflt_t,tint_t,scale=sc,offset=of,mvalue=mv,fvalue=fv)
+            ERA5Reanalysis.int2real!(tflt_t,tint_t,scale=sc,offset=of,mvalue=mv,fvalue=fv)
     
             sc = dds["d2m"].attrib["scale_factor"]
             of = dds["d2m"].attrib["add_offset"]
             mv = dds["d2m"].attrib["missing_value"]
             fv = dds["d2m"].attrib["_FillValue"]
             NCDatasets.load!(dds["d2m"].var,tint_d,:,:,it)
-            int2real!(tflt_d,tint_d,scale=sc,offset=of,mvalue=mv,fvalue=fv)
+            ERA5Reanalysis.int2real!(tflt_d,tint_d,scale=sc,offset=of,mvalue=mv,fvalue=fv)
     
             sc = pds["sp"].attrib["scale_factor"]
             of = pds["sp"].attrib["add_offset"]
             mv = pds["sp"].attrib["missing_value"]
             fv = pds["sp"].attrib["_FillValue"]
             NCDatasets.load!(pds["sp"].var,tint_p,:,:,it)
-            int2real!(tflt_p,tint_p,scale=sc,offset=of,mvalue=mv,fvalue=fv)
+            ERA5Reanalysis.int2real!(tflt_p,tint_p,scale=sc,offset=of,mvalue=mv,fvalue=fv)
 
             for ip = 1 : (np-2)
                 sc = qds[ip]["q"].attrib["scale_factor"]
