@@ -1,12 +1,11 @@
 using DrWatson
 @quickactivate "MaritimeContPWV"
 
-include(srcdir("calccsf.jl")); adderaparams()
+using ERA5Reanalysis
 
-for yr = 1979 : 2019
-    init,eroot = erastartup(aID=2,dID=1,path="/n/kuangdss01/lab/",welcome=false)
-    csf(init,eroot,eroot,regID="SEA",timeID=yr)
-    eraanalysis(init,eroot,modID="csfc",parID="csf",regID="SEA",plvls="sfc",timeID=yr)
-end
+include(srcdir("scwv.jl"))
 
-eracompile(init,eroot,modID="csfc",parID="csf",regID="SEA",plvls="sfc")
+e5ds = ERA5Hourly(start=Date(2021),stop=Date(2021),path=datadir())
+egeo = ERA5Region("TRP",gres=0.25)
+
+calculatecsf(e5ds,egeo)

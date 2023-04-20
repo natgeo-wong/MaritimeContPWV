@@ -45,10 +45,15 @@ function calculatescwv(
     lsd = getLandSea(e5ds,egeo);
     nlon = length(lsd.lon)
     nlat = length(lsd.lat)
-    p = era5Pressures(); p = p[p.>=p_top]; p = p[p.<=p_bot]
+    p = era5Pressures(); p = p[p.>=p_top]; p = p[p.<=p_bot]; np = length(p)
 
-    qvar_vec = PressureVariable.("q",hPa=p)
-    rvar_vec = PressureVariable.("r",hPa=p)
+    
+    qvar_vec = Vector{PressureVariable}(undef,np)
+    rvar_vec = Vector{PressureVariable}(undef,np)
+    for ip = 1 : np
+        qvar_vec[ip] = PressureVariable("q",hPa=p[ip])
+        rvar_vec[ip] = PressureVariable("r",hPa=p[ip])
+    end
     d2mvar   = SingleVariable("d2m")
     t2mvar   = SingleVariable("t2m")
     spvar    = SingleVariable("sp")
@@ -145,7 +150,7 @@ function calculatescwv(
             close(rdsii)
         end
 
-        save(view(tmp_s,:,:,1:nhr),dt,e5ds,evar,egeo,lsd)
+        ERA5Reanalysis.save(view(tmp_s,:,:,1:nhr),dt,e5ds,evar,egeo,lsd)
 
     end
 
