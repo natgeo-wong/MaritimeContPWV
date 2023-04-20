@@ -130,7 +130,7 @@ function calculatescwv(
                 fv = rds[ip]["r"].attrib["_FillValue"]
                 NCDatasets.load!(rds[ip]["r"].var,tint_q,:,:,it)
                 ERA5Reanalysis.int2real!(tflt_r,tint_r,scale=sc,offset=of,mvalue=mv,fvalue=fv)
-                @views @. tmp_es[:,:,ip+1] = tflt_q * tflt_r / 100
+                @views @. tmp_es[:,:,ip+1] = tflt_q / tflt_r * 100
             end
 
             for ilat = 1 : nlat, ilon = 1 : nlon
@@ -141,7 +141,7 @@ function calculatescwv(
                     tmp_ev[ip] = tmp_es[ilon,ilat,ip]
                     tmp_ip[ip] = p[ip] < pii
                 end
-                tmp_ev[end] = calcT2q(tii,pii) / calcT2q(dii,pii)
+                tmp_ev[end] = calcT2q(tii,pii)
                 tmp_ip[end] = true
                 tmp_s[ilon,ilat,it] = integrate(view(p,tmp_ip),view(tmp_ev,tmp_ip))
             end
