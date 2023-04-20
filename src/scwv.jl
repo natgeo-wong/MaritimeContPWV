@@ -70,13 +70,17 @@ function calculatescwv(
     tflt_t = zeros(nlon,nlat)
     tflt_d = zeros(nlon,nlat)
     tflt_p = zeros(nlon,nlat)
-    tmp_es = zeros(nlon,nlat,np)
+    tmp_es = zeros(nlon,nlat,np-1)
+    tmp_ev = zeros(np)
+    tmp_ip = zeros(Bool,np)
     tmp_s  = zeros(nlon,nlat,31*24)
 
     qds = Vector{NCDataset}(undef,np)
     rds = Vector{NCDataset}(undef,np)
 
     for dt in  e5ds.start : Month(1) : e5ds.stop
+
+        @info "$(now()) - MaritimeContPWV - Calculating $(e5ds.lname) $(evar.vname) data in $(egeo.geo.name) (Horizontal Resolution: $(egeo.gres)) for $(Dates.format(dt,dateformat"yyyy-mm")) ..."
 
         nhr = daysinmonth(dt) * 24
 
@@ -91,8 +95,6 @@ function calculatescwv(
         nhr = daysinmonth(dt) * 24
 
         for it = 1 : nhr
-
-            @info "$(now()) - MaritimeContPWV - Calculation of SCWV at $it ..."
 
             sc = tds["t2m"].attrib["scale_factor"]
             of = tds["t2m"].attrib["add_offset"]
@@ -132,21 +134,24 @@ function calculatescwv(
             end
 
             for ilat = 1 : nlat, ilon = 1 : nlon
-                tii = tflt_tii[ilon,ilat]
-                dii = tflt_dii[ilon,ilat]
-                pii = tflt_pii[ilon,ilat]
-                tmp_es[end] = calcT2q(tii,pii) / calcT2q(dii,pii)
-                tmp_s[ilon,ilat,it] = integrate(p,tmp_es)
+                tii = tflt_t[ilon,ilat]
+                dii = tflt_d[ilon,ilat]
+                pii = tflt_p[ilon,ilat]
+                for ip = 1 : (np-1)
+                    tmp_ev[ip] = tmp_es[ilon,ilat,ip]
+                    tmp_ip[ip] = p[ip] < pii
+                end
+                tmp_ev[end] = calcT2q(tii,pii) / calcT2q(dii,pii)
+                tmp_ip[end] = true
+                tmp_s[ilon,ilat,it] = integrate(view(p,tmp_ip),view(tmp_ev,tmp_ip))
             end
 
         end
 
-        close(tds); close(dds); close(wds); close(pds)
-        for qdsii in qds
-            close(qdsii)
-        end
-        for rdsii in rds
-            close(rdsii)
+        close(tds); close(dds); close(pds)
+        for ip = 1 : (np-2)
+            close(qds[ip])
+            close(rds[ip])
         end
 
         ERA5Reanalysis.save(view(tmp_s,:,:,1:nhr),dt,e5ds,evar,egeo,lsd)
